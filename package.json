@@ -11,9 +11,11 @@
     "test:unit": "jest --clearCache && vue-cli-service test:unit"
   },
   "dependencies": {
+    "@types/mockjs": "^1.0.7",
     "axios": "^0.21.1",
     "element-ui": "^2.15.1",
     "js-cookie": "^2.2.1",
+    "mockjs": "^1.1.0",
     "normalize.css": "^8.0.1",
     "nprogress": "^0.2.0",
     "path-to-regexp": "^6.2.0",

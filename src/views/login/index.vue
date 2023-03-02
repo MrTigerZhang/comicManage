@@ -1,16 +1,10 @@
 <template>
   <div class="login-container">
-    <el-form
-      ref="loginForm"
-      :model="loginForm"
-      :rules="loginRules"
-      class="login-form"
-      autocomplete="on"
-      label-position="left"
-    >
+    <el-form ref="loginForm" :model="loginForm" :rules="loginRules" class="login-form" autocomplete="on"
+      label-position="left">
       <div class="title-container">
         <h3 class="title">
-          Login Form
+          好康漫画网
         </h3>
       </div>
 
@@ -18,51 +12,30 @@
         <span class="svg-container">
           <svg-icon name="user" />
         </span>
-        <el-input
-          ref="username"
-          v-model="loginForm.username"
-          name="username"
-          type="text"
-          autocomplete="on"
-          placeholder="username"
-        />
+        <el-input ref="username" v-model="loginForm.username" name="username" type="text" autocomplete="on"
+          placeholder="请输入用户名" />
       </el-form-item>
 
       <el-form-item prop="password">
         <span class="svg-container">
           <svg-icon name="password" />
         </span>
-        <el-input
-          :key="passwordType"
-          ref="password"
-          v-model="loginForm.password"
-          :type="passwordType"
-          placeholder="password"
-          name="password"
-          autocomplete="on"
-          @keyup.enter.native="handleLogin"
-        />
-        <span
-          class="show-pwd"
-          @click="showPwd"
-        >
+        <el-input :key="passwordType" ref="password" v-model="loginForm.password" :type="passwordType" placeholder="请输入密码"
+          name="password" autocomplete="on" @keyup.enter.native="handleLogin" />
+        <span class="show-pwd" @click="showPwd">
           <svg-icon :name="passwordType === 'password' ? 'eye-off' : 'eye-on'" />
         </span>
       </el-form-item>
 
-      <el-button
-        :loading="loading"
-        type="primary"
-        style="width:100%; margin-bottom:30px;"
-        @click.native.prevent="handleLogin"
-      >
-        Sign in
+      <el-button :loading="loading" type="primary" style="width:100%; margin-bottom:30px;"
+        @click.native.prevent="handleLogin">
+        点击登陆
       </el-button>
 
       <div style="position:relative">
         <div class="tips">
           <span> username: admin </span>
-          <span> password: any </span>
+          <span> password: 123456 </span>
         </div>
       </div>
     </el-form>
@@ -83,7 +56,7 @@ import { isValidUsername } from '@/utils/validate'
 export default class extends Vue {
   private validateUsername = (rule: any, value: string, callback: Function) => {
     if (!isValidUsername(value)) {
-      callback(new Error('Please enter the correct user name'))
+      callback(new Error('请输入用用户名'))
     } else {
       callback()
     }
@@ -91,15 +64,15 @@ export default class extends Vue {
 
   private validatePassword = (rule: any, value: string, callback: Function) => {
     if (value.length < 6) {
-      callback(new Error('The password can not be less than 6 digits'))
+      callback(new Error('密码不能小于6位字符'))
     } else {
       callback()
     }
   }
 
   private loginForm = {
-    username: 'admin',
-    password: '111111'
+    username: 'manage',
+    password: '123456'
   }
 
   private loginRules = {
@@ -125,11 +98,12 @@ export default class extends Vue {
   }
 
   mounted() {
-    if (this.loginForm.username === '') {
-      (this.$refs.username as Input).focus()
-    } else if (this.loginForm.password === '') {
-      (this.$refs.password as Input).focus()
-    }
+    // if (this.loginForm.username === '') {
+    //  (this.$refs.username as Input).focus()
+    //  console.log( (this.$refs.username as Input).value)
+    // } else if (this.loginForm.password === '') {
+    //  (this.$refs.password as Input).focus()
+    // }
   }
 
   private showPwd() {
@@ -144,18 +118,21 @@ export default class extends Vue {
   }
 
   private handleLogin() {
-    (this.$refs.loginForm as ElForm).validate(async(valid: boolean) => {
+    (this.$refs.loginForm as ElForm).validate(async (valid: boolean) => {
       if (valid) {
         this.loading = true
-        await UserModule.Login(this.loginForm)
-        this.$router.push({
-          path: this.redirect || '/',
-          query: this.otherQuery
-        })
-        // Just to simulate the time of the request
-        setTimeout(() => {
+        try {
+          await UserModule.Login(this.loginForm)
           this.loading = false
-        }, 0.5 * 1000)
+          this.$router.push({
+            path: this.redirect || '/',
+            query: this.otherQuery
+          })
+        } catch (error) {
+          this.loading = false
+        }
+
+
       } else {
         return false
       }
@@ -177,8 +154,13 @@ export default class extends Vue {
 // References: https://www.zhangxinxu.com/wordpress/2018/01/css-caret-color-first-line/
 @supports (-webkit-mask: none) and (not (cater-color: $loginCursorColor)) {
   .login-container .el-input {
-    input { color: $loginCursorColor; }
-    input::first-line { color: $lightGray; }
+    input {
+      color: $loginCursorColor;
+    }
+
+    input::first-line {
+      color: $lightGray;
+    }
   }
 }
 

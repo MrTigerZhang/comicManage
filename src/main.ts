@@ -13,6 +13,8 @@ import router from '@/router'
 import '@/icons/components'
 import '@/permission'
 
+import '@/mock/mock'
+
 Vue.use(ElementUI)
 Vue.use(SvgIcon, {
   tagName: 'svg-icon',
