@@ -75,6 +75,7 @@ handleSetLineChartData函数将该面板的类型作为参数发送给父组件�
         </div>
       </div>
     </el-col>
+
   </el-row>
 </template>
 
