@@ -72,7 +72,7 @@ export const constantRoutes: RouteConfig[] = [
     component: () => import(/* webpackChunkName: "401" */ '@/views/error-page/401.vue'),
     meta: { hidden: true }
   },
-  {
+  { // 首页 控制面板
     path: '/',
     component: Layout,
     redirect: '/dashboard',
