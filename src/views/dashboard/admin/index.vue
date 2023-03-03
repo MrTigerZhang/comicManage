@@ -18,12 +18,7 @@ BoxCard：展示带图标的卡片式信息的组件。
     <!-- 右上角git图标 -->
     <github-corner class="github-corner" />
     <!-- PanelGroup：用于展示多个数据面板的组件，可以添加或删除数据面板。 -->
-    <panel-group @handle-set-line-chart-data="handleSetLineChartData" />
-    <!-- LineChart：展示折线图的组件。 -->
-    <el-row style="background: #fff; padding: 16px 16px 0; margin-bottom: 32px">
-      <line-chart :chart-data="lineChartData" />
-    </el-row>
-
+    <panel-group   />
   </div>
 </template>
 
@@ -33,31 +28,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import GithubCorner from '@/components/GithubCorner/index.vue'
 import BarChart from './components/BarChart.vue'
 import BoxCard from './components/BoxCard.vue'
-import LineChart, { ILineChartData } from './components/LineChart.vue'
 import PanelGroup from './components/PanelGroup.vue'
-import PieChart from './components/PieChart.vue'
-import RadarChart from './components/RadarChart.vue'
-import TodoList from './components/TodoList/index.vue'
-import TransactionTable from './components/TransactionTable.vue'
-
-const lineChartData: { [type: string]: ILineChartData } = {
-  newVisitis: {
-    expectedData: [100, 120, 161, 134, 105, 160, 165],
-    actualData: [120, 82, 91, 154, 162, 140, 145]
-  },
-  messages: {
-    expectedData: [200, 192, 120, 144, 160, 130, 140],
-    actualData: [180, 160, 151, 106, 145, 150, 130]
-  },
-  purchases: {
-    expectedData: [80, 100, 121, 104, 105, 90, 100],
-    actualData: [120, 90, 100, 138, 142, 130, 130]
-  },
-  shoppings: {
-    expectedData: [130, 140, 141, 142, 145, 150, 160],
-    actualData: [120, 82, 91, 154, 162, 140, 130]
-  }
-}
 
 @Component({
   name: 'DashboardAdmin',
@@ -65,20 +36,11 @@ const lineChartData: { [type: string]: ILineChartData } = {
     GithubCorner,
     BarChart,
     BoxCard,
-    LineChart,
-    PanelGroup,
-    PieChart,
-    RadarChart,
-    TodoList,
-    TransactionTable
+    PanelGroup
   }
 })
 export default class extends Vue {
-  private lineChartData = lineChartData.newVisitis;
 
-  private handleSetLineChartData(type: string) {
-    this.lineChartData = lineChartData[type]
-  }
 }
 </script>
 

@@ -95,6 +95,7 @@ export default class extends Vue {
   private money = 30;
   private magTotal = 12;
   private handleSetLineChartData(type: string) {
+    console.log('我发克油')
     this.$emit('handle-set-line-chart-data', type)
   }
 }
