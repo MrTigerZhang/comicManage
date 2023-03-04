@@ -32,17 +32,17 @@ paths:
           in: query
           description: Used to filter articles by importance.
           schema:
-            $ref: '#/components/schemas/Article/properties/importance'
+            $ref: "#/components/schemas/Article/properties/importance"
         - name: title
           in: query
           description: Used to filter articles by matched title substring.
           schema:
-            $ref: '#/components/schemas/Article/properties/title'
+            $ref: "#/components/schemas/Article/properties/title"
         - name: type
           in: query
           description: Used to filter articles by type.
           schema:
-            $ref: '#/components/schemas/Article/properties/type'
+            $ref: "#/components/schemas/Article/properties/type"
         - name: page
           in: query
           description: The wanted page number (one page).
@@ -86,7 +86,7 @@ paths:
                       items:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Article'
+                          $ref: "#/components/schemas/Article"
     post:
       tags:
         - articles
@@ -101,7 +101,7 @@ paths:
           required: true
           description: The data for new article.
           schema:
-            $ref: '#/components/schemas/Article'
+            $ref: "#/components/schemas/Article"
       responses:
         200:
           description: OK
@@ -117,9 +117,9 @@ paths:
                     type: object
                     properties:
                       article:
-                        $ref: '#/components/schemas/Article'
+                        $ref: "#/components/schemas/Article"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
   /articles/{id}:
     get:
       tags:
@@ -152,11 +152,11 @@ paths:
                     type: object
                     properties:
                       article:
-                        $ref: '#/components/schemas/Article'
+                        $ref: "#/components/schemas/Article"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
     put:
       tags:
         - articles
@@ -178,7 +178,7 @@ paths:
           required: true
           description: data for the updated article.
           schema:
-            $ref: '#/components/schemas/Article'
+            $ref: "#/components/schemas/Article"
       responses:
         200:
           description: OK
@@ -194,11 +194,11 @@ paths:
                     type: object
                     properties:
                       article:
-                        $ref: '#/components/schemas/Article'
+                        $ref: "#/components/schemas/Article"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
     delete:
       tags:
         - articles
@@ -227,9 +227,9 @@ paths:
                     type: integer
                     format: int32
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
   /pageviews:
     get:
       tags:
@@ -254,7 +254,7 @@ paths:
                       pageviews:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Pageviews'
+                          $ref: "#/components/schemas/Pageviews"
   /transactions:
     get:
       tags:
@@ -282,7 +282,7 @@ paths:
                       items:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Transaction'
+                          $ref: "#/components/schemas/Transaction"
   /roles:
     get:
       tags:
@@ -310,7 +310,7 @@ paths:
                       items:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Role'
+                          $ref: "#/components/schemas/Role"
     post:
       tags:
         - roles
@@ -325,7 +325,7 @@ paths:
           required: true
           description: The data for new role.
           schema:
-            $ref: '#/components/schemas/Role'
+            $ref: "#/components/schemas/Role"
       responses:
         200:
           description: OK
@@ -344,7 +344,7 @@ paths:
                         type: integer
                         format: int64
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
   /roles/{id}:
     put:
       tags:
@@ -367,7 +367,7 @@ paths:
           required: true
           description: The data for updated role.
           schema:
-            $ref: '#/components/schemas/Role'
+            $ref: "#/components/schemas/Role"
       responses:
         200:
           description: OK
@@ -383,11 +383,11 @@ paths:
                     type: object
                     properties:
                       role:
-                        $ref: '#/components/schemas/Role'
+                        $ref: "#/components/schemas/Role"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
     delete:
       tags:
         - roles
@@ -416,9 +416,9 @@ paths:
                     type: integer
                     format: int32
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
   /routes:
     get:
       tags:
@@ -441,7 +441,7 @@ paths:
                     type: object
                     properties:
                       routes:
-                        $ref: '#/components/schemas/Role/properties/routes'
+                        $ref: "#/components/schemas/Role/properties/routes"
   /users:
     get:
       tags:
@@ -474,9 +474,9 @@ paths:
                       items:
                         type: array
                         items:
-                          $ref: '#/components/schemas/User'
+                          $ref: "#/components/schemas/User"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
   /users/register:
     post:
       tags:
@@ -490,7 +490,7 @@ paths:
           required: true
           description: The data for created user.
           schema:
-            $ref: '#/components/schemas/User'
+            $ref: "#/components/schemas/User"
       responses:
         200:
           description: OK
@@ -515,13 +515,13 @@ paths:
           required: true
           description: The user name for login.
           schema:
-            $ref: '#/components/schemas/User/properties/username'
+            $ref: "#/components/schemas/User/properties/username"
         - name: password
           in: query
           required: true
           description: The password for login in clear text.
           schema:
-            $ref: '#/components/schemas/User/properties/password'
+            $ref: "#/components/schemas/User/properties/password"
       responses:
         200:
           description: OK
@@ -551,7 +551,7 @@ paths:
                         type: string
                         example: admin-token
         400:
-          $ref: '#/components/responses/InvalidUser'
+          $ref: "#/components/responses/InvalidUser"
   /users/logout:
     post:
       tags:
@@ -601,13 +601,13 @@ paths:
                     type: object
                     properties:
                       user:
-                        $ref: '#/components/schemas/User'
+                        $ref: "#/components/schemas/User"
         400:
-          $ref: '#/components/responses/InvalidUser'
+          $ref: "#/components/responses/InvalidUser"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
     put:
       tags:
         - users
@@ -644,13 +644,13 @@ paths:
                     type: object
                     properties:
                       user:
-                        $ref: '#/components/schemas/User'
+                        $ref: "#/components/schemas/User"
         400:
-          $ref: '#/components/responses/InvalidUser'
+          $ref: "#/components/responses/InvalidUser"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
     delete:
       tags:
         - users
@@ -678,11 +678,11 @@ paths:
                     type: integer
                     format: int32
         400:
-          $ref: '#/components/responses/InvalidUser'
+          $ref: "#/components/responses/InvalidUser"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
         404:
-          $ref: '#/components/responses/NotFound'
+          $ref: "#/components/responses/NotFound"
   /users/info:
     post:
       tags:
@@ -707,9 +707,44 @@ paths:
                     type: object
                     properties:
                       user:
-                        $ref: '#/components/schemas/User'
+                        $ref: "#/components/schemas/User"
         401:
-          $ref: '#/components/responses/Unauthorized'
+          $ref: "#/components/responses/Unauthorized"
+
+  /user/query:
+    post:
+      tags: User
+      summary: ceshi
+      description: Returns a test response
+      operationId: getUserList
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /user/eanble:
+    post:
+      tags: User
+      summary: ceshi
+      description: 起停用户
+      operationId: enableUser
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
 components:
   securitySchemes:
     AccessTokenAuth:
@@ -722,19 +757,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
     InvalidUser:
       description: Invalid username supplied
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
   schemas:
     Error:
       type: object
@@ -776,7 +811,7 @@ components:
           format: url
           example: https://a1.espncdn.com/combiner/i?img=%2Fphoto%2F2018%2F1103%2Fr458060_1296x729_16%2D9.jpg&w=920&h=518&scale=crop&cquality=80&location=origin&format=jpg
         timestamp:
-          $ref: '#/components/schemas/Timestamp'
+          $ref: "#/components/schemas/Timestamp"
         platforms:
           type: array
           items:
@@ -810,14 +845,14 @@ components:
             - JP
             - EU
         pageviews:
-          $ref: '#/components/schemas/Pageviews/properties/pageviews'
+          $ref: "#/components/schemas/Pageviews/properties/pageviews"
       required:
-       - id
-       - status
-       - title
-       - timestamp
-       - importance
-       - author
+        - id
+        - status
+        - title
+        - timestamp
+        - importance
+        - author
     Pageviews:
       type: object
       properties:
@@ -842,7 +877,7 @@ components:
           type: string
           format: uuid
         timestamp:
-          $ref: '#/components/schemas/Timestamp'
+          $ref: "#/components/schemas/Timestamp"
         username:
           type: string
           example: Chong Guo
@@ -873,7 +908,7 @@ components:
           type: string
           example: Super Administrator. Have access to view all pages.
         routes:
-          $ref: '#/components/schemas/AnyValue'
+          $ref: "#/components/schemas/AnyValue"
       required:
         - key
         - name
@@ -908,7 +943,7 @@ components:
         roles:
           type: array
           items:
-            $ref: '#/components/schemas/Role/properties/key'
+            $ref: "#/components/schemas/Role/properties/key"
       required:
         - id
         - username
@@ -916,10 +951,10 @@ components:
         - roles
     Timestamp:
       oneOf:
-      - type: integer
-        format: int32
-        example: 1559605283
-      - type: string
-        format: date-time
-        example: 2017-07-21T17:32:28Z
+        - type: integer
+          format: int32
+          example: 1559605283
+        - type: string
+          format: date-time
+          example: 2017-07-21T17:32:28Z
     AnyValue: {}

@@ -42,3 +42,12 @@ export interface IUserData {
   introduction: string
   roles: string[]
 }
+
+export interface User {
+  id: number
+  nickname: string
+  phone: string
+  balance: number
+  createDate: string
+  status: number
+}
