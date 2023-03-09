@@ -63,7 +63,9 @@ export default {
     i18n: '国际化',
     externalLink: '外链',
     profile: '个人中心',
-    users: '用户管理'
+    users: '用户管理',
+    settins: '系统设置',
+    indexAd: '首页图片广告设置'
   },
   navbar: {
     logOut: '退出登录',

@@ -199,6 +199,27 @@ export const asyncRoutes: RouteConfig[] = [
         }
       }
     ]
+  }, {
+    path: '/settings',
+    component: Layout,
+    redirect: '/settins/directive',
+    meta: {
+      title: 'settins',
+      icon: 'component',
+      roles: ['admin', 'editor'],
+      alwaysShow: true
+    },
+    children: [
+      {
+        path: 'indexAd',
+        component: () => import(/* webpackChunkName: "permission-page" */ '@/views/AD/index.vue'),
+        name: 'indexAd',
+        meta: {
+          title: 'indexAd',
+          roles: ['admin', 'editor']
+        }
+      }
+    ]
   },
   {
     path: '/icon',
