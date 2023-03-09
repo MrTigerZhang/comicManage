@@ -65,7 +65,8 @@ export default {
     profile: '个人中心',
     users: '用户管理',
     settins: '系统设置',
-    indexAd: '首页图片广告设置'
+    indexAd: '首页图片广告设置',
+    systemInfo: '网站关键信息'
   },
   navbar: {
     logOut: '退出登录',

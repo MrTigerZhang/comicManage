@@ -12,3 +12,16 @@ export const setIndexAd = (data: any) =>
     method: 'post',
     data
   })
+
+export const getSystemInfo = () =>
+  request({
+    url: '/settings/getSystemInfo',
+    method: 'post'
+  })
+
+export const setSystemInfo = (data: any) =>
+  request({
+    url: '/settings/setSystemInfo',
+    method: 'post',
+    data
+  })

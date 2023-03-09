@@ -778,6 +778,39 @@ paths:
                 properties:
                   message:
                     type: string
+
+  /settings/getSystemInfo:
+    post:
+      tags: settings
+      summary: ceshi
+      description: 获取系统关键信息
+      operationId: getSystemInfo
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /settings/setSystemInfo:
+    post:
+      tags: settings
+      summary: ceshi
+      description: 设置关键信息
+      operationId: setSystemInfo
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 components:
   securitySchemes:
     AccessTokenAuth:

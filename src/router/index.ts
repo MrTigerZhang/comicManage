@@ -200,6 +200,7 @@ export const asyncRoutes: RouteConfig[] = [
       }
     ]
   }, {
+    // 系统设置
     path: '/settings',
     component: Layout,
     redirect: '/settins/directive',
@@ -210,7 +211,17 @@ export const asyncRoutes: RouteConfig[] = [
       alwaysShow: true
     },
     children: [
-      {
+      { // 设置网站信息
+        path: 'systemInfo',
+        component: () => import(/* webpackChunkName: "permission-page" */ '@/views/SEO/index.vue'),
+        name: 'systemInfo',
+        meta: {
+          title: 'systemInfo',
+          roles: ['admin', 'editor']
+        }
+      },
+
+      { // 设置首页广告
         path: 'indexAd',
         component: () => import(/* webpackChunkName: "permission-page" */ '@/views/AD/index.vue'),
         name: 'indexAd',

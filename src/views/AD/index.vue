@@ -88,6 +88,9 @@ export default {
   },
   methods: {
     async handleSubmit() {
+      if (this.loading) {
+        return
+      }
       this.loading = true
       this.$refs.form.validate(async(valid) => {
         if (valid) {
@@ -105,7 +108,6 @@ export default {
       })
     },
     handleSuccess(response) {
-      console.log('我日你妈')
       console.log(response.files.avatar)
       this.formData.imgUrl = response.files.avatar
     },
