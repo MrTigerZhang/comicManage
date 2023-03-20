@@ -66,7 +66,8 @@ export default {
     users: '用户管理',
     settins: '系统设置',
     indexAd: '首页图片广告设置',
-    systemInfo: '网站关键信息'
+    systemInfo: '网站关键信息',
+    category: '漫画分类管理'
   },
   navbar: {
     logOut: '退出登录',

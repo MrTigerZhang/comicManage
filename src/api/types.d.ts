@@ -51,3 +51,12 @@ export interface User {
   createDate: string
   status: number
 }
+export interface ComicCategoryData {
+  id?: number
+  name?: string
+  description?: string
+  code?: string
+  sortOrder?: number
+  icon?: string
+  status?: 'active' | 'inactive'
+}

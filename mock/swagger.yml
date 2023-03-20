@@ -811,6 +811,56 @@ paths:
                 properties:
                   message:
                     type: string
+  /cat/get:
+    post:
+      tags: cats
+      summary: ceshi
+      description: 获取cat
+      operationId: getCategories
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+
+  /cat/delete:
+    post:
+      tags: cats
+      summary: ceshi
+      description: 删除
+      operationId: deleteCategory
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /cat/add:
+    post:
+      tags: cats
+      summary: ceshi
+      description: 添加
+      operationId: addCategory
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
 components:
   securitySchemes:
     AccessTokenAuth:

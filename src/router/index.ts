@@ -89,7 +89,7 @@ export const constantRoutes: RouteConfig[] = [
       }
     ]
   },
-  { // 首页 控制面板
+  { //   用户管理
     path: '/users',
     component: Layout,
     redirect: '/users/index',
@@ -101,6 +101,23 @@ export const constantRoutes: RouteConfig[] = [
         meta: {
           title: 'users',
           icon: 'people',
+          affix: true
+        }
+      }
+    ]
+  },
+  { //   分类管理
+    path: '/category',
+    component: Layout,
+    redirect: '/category/index',
+    children: [
+      {
+        path: 'category',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/category/index.vue'),
+        name: 'category',
+        meta: {
+          title: 'category',
+          icon: 'tree',
           affix: true
         }
       }

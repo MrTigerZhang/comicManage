@@ -108,7 +108,6 @@ export default {
       })
     },
     handleSuccess(response) {
-      console.log(response.files.avatar)
       this.formData.imgUrl = response.files.avatar
     },
     toggleShow() {
