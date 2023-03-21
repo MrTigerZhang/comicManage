@@ -861,6 +861,87 @@ paths:
                 properties:
                   message:
                     type: string
+  /author/get:
+    post:
+      tags: cats
+      summary: ceshi
+      description: 查询作者列表
+      operationId: getAuthors
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /author/add:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: addAuthor
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /author/update:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: updateAuthor
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+  /author/delete:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: deleteAuthor
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /author/toggleAuthorStatus:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: toggleAuthorStatus
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string                   
 components:
   securitySchemes:
     AccessTokenAuth:

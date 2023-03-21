@@ -1,0 +1,335 @@
+<template>
+  <div class="components-container">
+    <!-- 查询表单 -->
+    <el-form
+      ref="searchForm"
+      :model="searchForm"
+      class="search"
+      inline
+      label-width="80px"
+    >
+      <el-form-item label="作者名字">
+        <el-input v-model="searchForm.name"></el-input>
+      </el-form-item>
+      <el-form-item label="手机号">
+        <el-input v-model="searchForm.phone"></el-input>
+      </el-form-item>
+      <el-form-item label="创建日期">
+        <el-date-picker
+          v-model="searchForm.createDate"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+        ></el-date-picker>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="searchAuthors">查询</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="openDialog('add')"
+          >新增作者</el-button
+        >
+      </el-form-item>
+    </el-form>
+
+    <!-- 作者列表 -->
+    <el-table :data="authors" border style="width: 100%">
+      <el-table-column prop="icon" label="头像">
+        <template #default="{row}">
+          <div @click="showImagePreview(row.icon)">
+            <el-image
+              :src="row.icon"
+              :preview-src-list="[row.icon]"
+              :fit="'contain'"
+              style="width: 50px; height: 50px"
+            ></el-image>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column prop="name" label="作者名字"></el-table-column>
+      <el-table-column prop="phone" label="手机号"></el-table-column>
+      <el-table-column prop="email" label="邮箱"></el-table-column>
+      <el-table-column prop="createDate" label="创建日期"></el-table-column>
+      <el-table-column prop="status" label="是否禁用" width="120">
+        <template #default="{row}">
+          <el-switch
+            v-model="row.status"
+            active-value="active"
+            inactive-value="inactive"
+            @change="toggleAuthorStatus(row)"
+          ></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="160">
+        <template #default="{row}">
+          <el-button
+            type="primary"
+            size="mini"
+            @click="openDialog('edit', row)"
+          >
+            编辑
+          </el-button>
+          <el-button type="danger" size="mini" @click="deleteAuthor(row)">
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[10, 20, 50, 100]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+      style="margin-top: 20px"
+    ></el-pagination>
+
+    <!-- 添加/编辑作者对话框 -->
+    <el-dialog
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+      width="30%"
+      @close="resetDialog"
+    >
+      <el-form ref="form" :model="formData" :rules="rules" label-width="80px">
+        <el-form-item label="头像" prop="icon">
+          <div @click="showImageCropUpload = !showImageCropUpload">
+            <el-image
+              v-if="formData.icon"
+              :src="formData.icon"
+              :preview-src-list="[formData.icon]"
+              :fit="'contain'"
+              style="width: 50px; height: 50px"
+            ></el-image>
+            <span v-else class="el-icon-upload"></span>
+          </div>
+          <image-crop-upload
+            url="https://httpbin.org/post"
+            :width="150"
+            :height="150"
+            :outputFormat="'png'"
+            :scaleRatio="0.1"
+            v-model="showImageCropUpload"
+            :field="'icon'"
+            @crop-success="cropSuccess"
+            @crop-cancel="resetImageCropUpload"
+          ></image-crop-upload>
+        </el-form-item>
+        <el-form-item label="作者名字" prop="name">
+          <el-input v-model="formData.name"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="formData.phone"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="formData.email"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitDialog">提交</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 图片预览对话框 -->
+    <el-dialog
+      title="图片预览"
+      :visible.sync="imagePreviewDialogVisible"
+      width="300px"
+    >
+      <el-image
+        :src="previewImageUrl"
+        :fit="'contain'"
+        class="image-preview"
+      ></el-image>
+    </el-dialog>
+  </div>
+</template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import VueImageCropUpload from 'vue-image-crop-upload'
+import {
+  getAuthors,
+  addAuthor,
+  updateAuthor,
+  deleteAuthor,
+  toggleAuthorStatus
+} from '@/api/author'
+
+@Component({
+  components: {
+    'image-crop-upload': VueImageCropUpload
+  }
+})
+export default class AuthorManagement extends Vue {
+  authors: any[] = [];
+  currentPage = 1;
+  pageSize = 10;
+  total = 0;
+  previewImageUrl = ''; // Add this data property
+  imagePreviewDialogVisible = false; // Add this data property
+
+  searchForm = {
+    name: '',
+    phone: '',
+    createDate: []
+  };
+
+  dialogVisible = false;
+  dialogTitle = '';
+  formData: any = {};
+  rules = {
+    icon: [
+      {
+        validator: (rules: any, value: any, callback: any) => {
+          if (!this.formData.icon) {
+            callback(new Error('头像是必填项'))
+          } else {
+            callback()
+          }
+        },
+        trigger: 'change'
+      }
+    ],
+    name: [{ required: true, message: '作者名字是必填项', trigger: 'blur' }],
+    phone: [
+      { required: true, message: '手机号是必填项', trigger: 'blur' },
+      {
+        pattern: /^1[3-9]\d{9}$/,
+        message: '请输入有效的手机号',
+        trigger: 'blur'
+      }
+    ],
+    email: [
+      { required: true, message: '邮箱是必填项', trigger: 'blur' },
+      { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
+    ]
+  };
+
+  showImageCropUpload = false;
+
+  mounted() {
+    this.getAuthorsData()
+  }
+
+  async getAuthorsData() {
+    await this.searchAuthors()
+  }
+
+  async searchAuthors() {
+    // Extract the start and end dates from the createDate array
+    const [startDate, endDate] = this.searchForm.createDate
+
+    // 实现查询方法
+    // 实现数据请求方法
+    const data = (
+      await getAuthors({
+        search: {
+          ...this.searchForm,
+          startDate, // Send the start date separately
+          endDate // Send the end date separately
+        },
+        currentPage: this.currentPage,
+        pageSize: this.pageSize
+      })
+    ).data
+    this.authors = data.list
+    this.total = data.total
+  }
+
+  handleSizeChange(val: number) {
+    this.pageSize = val
+    this.getAuthorsData()
+  }
+
+  handleCurrentChange(val: number) {
+    this.currentPage = val
+    this.getAuthorsData()
+  }
+
+  openDialog(type: string, author?: any) {
+    this.dialogTitle = type === 'add' ? '新增作者' : '编辑作者'
+    this.formData = author ? Object.assign({}, author) : {}
+    this.dialogVisible = true
+  }
+
+  submitDialog() {
+    // 实现表单提交方法
+    (this.$refs.form as any).validate((valid: boolean) => {
+      if (valid) {
+        const submitMethod =
+          this.dialogTitle === '新增作者' ? addAuthor : updateAuthor
+        submitMethod(this.formData).then(() => {
+          this.$message.success(`${this.dialogTitle}成功`)
+          this.dialogVisible = false
+          this.getAuthorsData()
+        })
+      }
+    })
+  }
+
+  resetDialog() {
+    (this.$refs.form as any).resetFields()
+    this.showImageCropUpload = false
+  }
+
+  cropSuccess(response: any) {
+    console.log(response)
+    this.formData.icon = response.data.url
+    this.showImageCropUpload = false
+  }
+
+  resetImageCropUpload() {
+    this.showImageCropUpload = false
+  }
+
+  deleteAuthor(author: any) {
+    // 实现删除作者方法
+    this.$confirm('确定删除该作者吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      deleteAuthor(author).then(() => {
+        this.$message.success('删除成功')
+        this.getAuthorsData()
+      })
+    })
+  }
+
+  toggleAuthorStatus(author: any) {
+    // 实现启用/禁用作者方法
+    toggleAuthorStatus(author).then(() => {
+      this.$message.success(author.status === 'active' ? '已启用' : '已禁用')
+      this.getAuthorsData()
+    })
+  }
+
+  showImagePreview(url: string) {
+    this.previewImageUrl = url
+    this.imagePreviewDialogVisible = true
+  }
+}
+</script>
+
+<style scoped>
+.author-container {
+  margin: 20px;
+}
+.search {
+  margin-bottom: 20px;
+}
+
+/* ... */
+
+.image-preview {
+  max-width: 90%;
+  max-height: 90%;
+}
+</style>

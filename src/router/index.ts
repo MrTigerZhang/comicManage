@@ -123,6 +123,76 @@ export const constantRoutes: RouteConfig[] = [
       }
     ]
   },
+  { //   作者管理
+    path: '/author',
+    component: Layout,
+    redirect: '/author/index',
+    children: [
+      {
+        path: 'author',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/author/index.vue'),
+        name: 'author',
+        meta: {
+          title: 'author',
+          icon: 'user',
+          affix: true
+        }
+      }
+    ]
+  },
+  { //   漫画管理¬
+    path: '/comic',
+    component: Layout,
+    redirect: '/comic/index',
+    children: [
+      { // 漫画列表页面
+        path: 'comic',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/comic/index.vue'),
+        name: 'comic',
+        meta: {
+          title: 'comic',
+          icon: 'education',
+          affix: true
+        }
+      },
+      { // 漫画新增和编辑/详情页面
+        path: 'detail/:id(\\d+)',
+        component: () => import('@/views/comic/comidDetail.vue'),
+        name: 'Detail',
+        meta: {
+          title: 'comicDetail',
+          noCache: true,
+          hidden: true
+        }
+      },
+      { // 章节新增和编辑/详情页面
+        path: 'chapterDetail/:id(\\d+)',
+        component: () => import('@/views/comic/chapterDetail.vue'),
+        name: 'chapterDetail',
+        meta: {
+          title: 'chapterDetail',
+          noCache: true,
+          hidden: true
+        }
+      }
+    ]
+  }, { //   订单管理
+    path: '/order',
+    component: Layout,
+    redirect: '/order/index',
+    children: [
+      {
+        path: 'order',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/order/index.vue'),
+        name: 'order',
+        meta: {
+          title: 'order',
+          icon: 'money',
+          affix: true
+        }
+      }
+    ]
+  },
   // {
   //   path: '/documentation',
   //   component: Layout,
