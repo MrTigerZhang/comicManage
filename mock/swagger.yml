@@ -1134,6 +1134,23 @@ paths:
                 type: object
                 properties:
                   message:
+                    type: string
+                    
+  /msg/select:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: select
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
                     type: string  
                     
                                     

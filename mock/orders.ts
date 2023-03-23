@@ -55,3 +55,29 @@ export const manualPay = (req: Request, res: Response) => {
     }
   })
 }
+function generateMessages(num:number) {
+  const messages = []
+
+  for (let i = 0; i < num; i++) {
+    const message = {
+      id: faker.random.uuid(),
+      title: faker.lorem.sentence(),
+      date: faker.date.between('2022-01-01', '2023-01-01').toISOString(),
+      status: faker.random.arrayElement(['read', 'unread']),
+      msg: faker.lorem.sentence()
+    }
+    messages.push(message)
+  }
+
+  return messages
+}
+
+export const select = (req: Request, res: Response) => {
+  return res.json({
+    code: 20000,
+    data: {
+      total: 10,
+      list: generateMessages(10)
+    }
+  })
+}
