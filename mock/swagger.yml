@@ -941,7 +941,164 @@ paths:
                 type: object
                 properties:
                   message:
-                    type: string                   
+                    type: string 
+
+  /comic/list:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: getComicList
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string   
+
+  /comic/getCategorys:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: getCategorys
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string    
+  /comic/toggleBan:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: toggleBan
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string    
+
+  /comic/getComicDetail:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: getComicDetail
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string   
+
+  /comic/getAuthors:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: getAuthors2
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string  
+                    
+  /comic/queryChapters:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: queryChapters
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string  
+                    
+                      
+  /comic/getChapterById:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: getChapterById
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string  
+                    
+                       
+  /comic/addOrUpdateChapter:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: addOrUpdateChapter
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string  
+                     
+                       
+  /comic/queryContentList:
+    post:
+      tags: cats
+      summary: ceshi
+      description:  
+      operationId: queryContentList
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string  
+                    
+                                    
 components:
   securitySchemes:
     AccessTokenAuth:

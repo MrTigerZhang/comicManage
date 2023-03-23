@@ -229,10 +229,17 @@ export default class ComicCategory extends Vue {
     if (this.submitting) {
       return
     }
-    this.submitting = true
-    // 在这里实现删除分类的逻辑
-    await deleteCategory(category.id)
-    this.submitting = false
+
+    this.$confirm('确定删除该分类吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(async() => {
+      // 在这里实现删除分类的逻辑
+      this.submitting = true
+      await deleteCategory(category.id)
+      this.submitting = false
+    })
   }
 
   // 重置 newCategory 对象

@@ -156,21 +156,22 @@ export const constantRoutes: RouteConfig[] = [
         }
       },
       { // 漫画新增和编辑/详情页面
-        path: 'detail/:id(\\d+)',
+        path: 'editor/:id(\\d+)',
         component: () => import('@/views/comic/comidDetail.vue'),
-        name: 'Detail',
+        name: 'editor',
         meta: {
           title: 'comicDetail',
           noCache: true,
           hidden: true
         }
       },
-      { // 章节新增和编辑/详情页面
-        path: 'chapterDetail/:id(\\d+)',
+
+      { // 漫画章节页面
+        path: 'editorChapter/:comicId(\\d+)/:chapterId(\\d+)/:comicTitle',
         component: () => import('@/views/comic/chapterDetail.vue'),
-        name: 'chapterDetail',
+        name: 'editorChapter',
         meta: {
-          title: 'chapterDetail',
+          title: 'editorChapter',
           noCache: true,
           hidden: true
         }

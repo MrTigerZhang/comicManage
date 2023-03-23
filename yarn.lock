@@ -12106,6 +12106,11 @@ vue-template-es2015-compiler@^1.6.0, vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
+vue-upload-component@^2.8.23:
+  version "2.8.23"
+  resolved "https://registry.npmmirror.com/vue-upload-component/-/vue-upload-component-2.8.23.tgz#908df86dbcf1a0d1ffa7fca6987c33c6e5159564"
+  integrity sha512-diy7wOROLmfUj3zBYZ6HwqX7K4P0nmFKguhXTHA2pU2SrxTbUQc/eaOGnJJ6D75vexrvG8x7OPtSBLw9RUYbEQ==
+
 vue2-dropzone@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/vue2-dropzone/-/vue2-dropzone-3.6.0.tgz#b4bb4b64de1cbbb3b88f04b24878e06780a51546"
