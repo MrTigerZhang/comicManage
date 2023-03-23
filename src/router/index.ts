@@ -193,6 +193,22 @@ export const constantRoutes: RouteConfig[] = [
         }
       }
     ]
+  }, { //   消息管理
+    path: '/msg',
+    component: Layout,
+    redirect: '/msg/index',
+    children: [
+      {
+        path: 'msg',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/msg/index.vue'),
+        name: 'msg',
+        meta: {
+          title: 'msg',
+          icon: 'email',
+          affix: true
+        }
+      }
+    ]
   },
   // {
   //   path: '/documentation',

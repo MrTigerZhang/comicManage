@@ -72,7 +72,8 @@ export default {
     comic: '漫画管理',
     order: '订单管理',
     comicDetail: '漫画详情管理',
-    editorChapter: '漫画章节详情'
+    editorChapter: '漫画章节详情',
+    msg: '消息列表'
   },
   navbar: {
     logOut: '退出登录',
