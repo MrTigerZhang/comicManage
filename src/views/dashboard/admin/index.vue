@@ -16,7 +16,7 @@ BoxCard：展示带图标的卡片式信息的组件。
 整个组件的样式使用了SCSS预处理器，并在1024px的屏幕宽度以下进行了媒体查询调整。 -->
   <div class="dashboard-editor-container">
     <!-- 右上角git图标 -->
-    <github-corner class="github-corner" />
+    <!-- <github-corner class="github-corner" /> -->
     <!-- PanelGroup：用于展示多个数据面板的组件，可以添加或删除数据面板。 -->
     <panel-group   />
   </div>

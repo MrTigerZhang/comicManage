@@ -28,7 +28,7 @@ handleSetLineChartData函数将该面板的类型作为参数发送给父组件�
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('messages')">
+      <div class="card-panel" @click="handleSetLineChartData('comics')">
         <div class="card-panel-icon-wrapper icon-message">
           <svg-icon name="education" class="card-panel-icon" />
         </div>
@@ -60,7 +60,7 @@ handleSetLineChartData函数将该面板的类型作为参数发送给父组件�
       </div>
     </el-col>
     <el-col :xs="12" :sm="12" :lg="6" class="card-panel-col">
-      <div class="card-panel" @click="handleSetLineChartData('shoppings')">
+      <div class="card-panel" @click="handleSetLineChartData('msgs')">
         <div class="card-panel-icon-wrapper icon-shopping">
           <svg-icon name="message" class="card-panel-icon" />
         </div>
@@ -68,20 +68,20 @@ handleSetLineChartData函数将该面板的类型作为参数发送给父组件�
           <div class="card-panel-text">系统消息</div>
           <count-to
             :start-val="0"
-            :end-val="magTotal"
+            :end-val="msgTotal"
             :duration="3600"
             class="card-panel-num"
           />
         </div>
       </div>
     </el-col>
-
   </el-row>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import CountTo from 'vue-count-to'
+import { dashboardData } from '@/api/dashboard'
 
 @Component({
   name: 'PanelGroup',
@@ -93,10 +93,29 @@ export default class extends Vue {
   private userTotal = 1000;
   private comicTotal = 1000;
   private money = 30;
-  private magTotal = 12;
+  private msgTotal = 12;
   private handleSetLineChartData(type: string) {
-    console.log('我发克油')
     this.$emit('handle-set-line-chart-data', type)
+    if (type === 'userTotal') {
+      this.$router.push('/users/users')
+    }
+    if (type === 'comics') {
+      this.$router.push('/comic/comic')
+    }
+    if (type === 'purchases') {
+      this.$router.push('/order/order')
+    }
+    if (type === 'msgs') {
+      this.$router.push('/msg/msg')
+    }
+  }
+
+  async created() {
+    const data = (await dashboardData({})).data
+    this.userTotal = data.userTotal
+    this.comicTotal = data.comicTotal
+    this.money = data.money
+    this.msgTotal = data.msgTotal
   }
 }
 </script>
