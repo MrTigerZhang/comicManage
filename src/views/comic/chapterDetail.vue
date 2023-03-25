@@ -11,6 +11,7 @@
       :model="chapterForm"
       label-width="120px"
       @submit.native.prevent
+      v-loading="listLoading"
     >
       <el-form-item
         label="章节名称"
@@ -41,7 +42,6 @@
         :rules="[
           {required: true, message: '请上传缩略图', trigger: 'change'}
         ]"
-
       >
         <div v-if="chapterForm.thumbnail">
           <el-image
@@ -72,6 +72,10 @@
       :chapterId="chapterId"
     ></image-list>
     <vue-image-crop-upload
+      url="/api/upload"
+      :headers="{
+        'X-Access-Token': getToken()
+      }"
       v-model="showCropDialog"
       :output-format="'jpeg'"
       :width="150"
@@ -88,6 +92,8 @@ import { Component, Vue } from 'vue-property-decorator'
 import VueImageCropUpload from 'vue-image-crop-upload'
 import { getChapterById, addOrUpdateChapter } from '@/api/comic'
 import ImageList from './cmps/ImageList.vue'
+import { decryptImage } from '@/utils/AES'
+import { UserModule } from '@/store/modules/user'
 @Component({
   components: {
     VueImageCropUpload,
@@ -98,12 +104,15 @@ export default class EditChapter extends Vue {
   chapterForm = {
     name: '',
     thumbnail: '',
+    thumbnailUrl: '',
     pageCount: 1,
     price: 0,
     status: true,
     order: 1,
     chapterId: ''
   };
+
+  listLoading = true;
 
   isEditMode = false;
   showCropDialog = false;
@@ -117,9 +126,14 @@ export default class EditChapter extends Vue {
     this.comicTitle = this.$route.params.comicTitle
     if (this.$route.params.chapterId !== '-1') {
       this.isEditMode = true
+      this.listLoading = true
       // 在这里获取章节数据并赋值给 chapterForm
       const data = await getChapterById(this.$route.params.chapterId)
       this.chapterForm = data.data
+      this.chapterForm.thumbnail = await decryptImage(
+        this.chapterForm.thumbnailUrl
+      )
+      this.listLoading = false
       this.updateNameLength()
     }
   }
@@ -169,16 +183,24 @@ export default class EditChapter extends Vue {
   }
 
   cropSuccess(imgDataUrl: string) {
-    this.chapterForm.thumbnail = imgDataUrl
-    this.showCropDialog = false
+    console.log(imgDataUrl)
+    // this.chapterForm.thumbnail = imgDataUrl;
+    // this.showCropDialog = false;
   }
 
-  cropUploadSuccess(response: any) {
-    console.log('cropUploadSuccess', response)
+  async cropUploadSuccess(response: any) {
+    this.chapterForm.thumbnailUrl = response.data
+    this.chapterForm.thumbnail = await decryptImage(
+      this.chapterForm.thumbnailUrl
+    )
   }
 
   cropUploadFail(error: any) {
     console.log('cropUploadFail', error)
+  }
+
+  getToken() {
+    return UserModule.token
   }
 }
 </script>

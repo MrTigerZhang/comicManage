@@ -6,10 +6,10 @@
       </el-form-item>
       <el-form-item label="图片" prop="imgUrl">
         <img
-          v-if="formData.imgUrl"
-          :src="formData.imgUrl"
-          width="600"
-          height="200"
+          v-if="formData.imgIcon"
+          :src="formData.imgIcon"
+          width="686"
+          height="144"
           @click="previewImg"
         />
         <div />
@@ -27,11 +27,12 @@
           :headers="{
             'X-Access-Token': getToken()
           }"
-          url="https://httpbin.org/post"
+          url="/api/upload"
           :accept="'image/png, image/jpeg, image/gif'"
           :img-format="'png'"
           :img-quality="1"
-          :crop-config="{aspectRatio: 16 / 9}"
+          :width="686"
+          :height="144"
           :icon="{type: 'md-camera', size: '28px', color: '#8c939d'}"
           :canCrop="false"
           :crop-center="false"
@@ -48,7 +49,7 @@
       </el-form-item>
     </el-form>
     <el-dialog :visible.sync="dialogVisible" width="50%">
-      <img :src="formData.imgUrl" style="width: 100%" />
+      <img :src="formData.imgIcon" style="width: 100%" />
     </el-dialog>
   </div>
 </template>
@@ -57,6 +58,7 @@ import { getIndexAd, setIndexAd } from '@/api/settings'
 import VueImageCropUpload from 'vue-image-crop-upload'
 import { MessageBox } from 'element-ui'
 import { UserModule } from '@/store/modules/user'
+import { decryptImage } from '@/utils/AES'
 export default {
   data() {
     return {
@@ -78,11 +80,13 @@ export default {
     VueImageCropUpload
   },
   async created() {
-    // 模拟数据加载
+    //
     this.loading = true
     const ad = await (await getIndexAd()).data
     this.formData.link = ad.link
+    // 加载解密
     this.formData.imgUrl = ad.imgUrl
+    this.formData.imgIcon = await decryptImage(this.formData.imgUrl)
     this.formData.isShow = ad.isShow === 1
     this.loading = false
   },
@@ -107,8 +111,10 @@ export default {
         }
       })
     },
-    handleSuccess(response) {
-      this.formData.imgUrl = response.files.avatar
+    async handleSuccess(response) {
+      // 上传后 解密
+      this.formData.imgUrl = response.data
+      this.formData.imgIcon = await decryptImage(this.formData.imgUrl)
     },
     toggleShow() {
       this.showUpload = !this.showUpload

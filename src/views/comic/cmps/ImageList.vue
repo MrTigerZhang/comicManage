@@ -22,6 +22,7 @@
       border
       row-key="id"
       @selection-change="handleSelectionChange"
+       v-loading="listLoading"
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="id" label="ID" width="80"></el-table-column>
@@ -68,7 +69,7 @@ import {
   updateContentSort
 } from '@/api/comic'
 import Sortable from 'sortablejs'
-
+import { decryptImage } from '@/utils/AES'
 @Component({
   components: {
     dropzone: Dropzone
@@ -78,7 +79,8 @@ export default class ComicContentManager extends Vue {
   @Prop({ required: true }) chapterId!: string;
   @Prop({ required: true }) comicId!: string;
   private sortable: Sortable | null = null;
-  comicList = [
+  listLoading =false
+  comicList:any = [
     // 示例数据
   ];
 
@@ -92,9 +94,21 @@ export default class ComicContentManager extends Vue {
   }
 
   async queryContent() {
+    this.listLoading = true
     const data = await queryContentList({ chapterId: this.chapterId })
-    console.log('我的发')
     this.comicList = data.data
+
+    const decryptedIcons = await Promise.all(
+      this.comicList.map(async(cc:any) => {
+        return await decryptImage(cc.imgSrcUrl)
+      })
+    )
+
+    this.comicList = this.comicList.map((cc:any, index:any) => {
+      cc.imgSrc = decryptedIcons[index]
+      return cc
+    })
+    this.listLoading = false
   }
 
   handleSelectionChange(selectedRows: any[]) {
@@ -125,6 +139,7 @@ export default class ComicContentManager extends Vue {
 
   async del(row: any) {
     await deleteContent({ id: row.id })
+    this.queryContent()
   }
 
   private async dropzoneSuccess(file: File, response: any) {

@@ -7,6 +7,7 @@
 
     <el-table
       :data="comicCategories"
+      v-loading="listLoading"
       border
       row-key="id"
       ref="form"
@@ -17,7 +18,6 @@
       <el-table-column prop="name" label="分类名称"></el-table-column>
       <el-table-column prop="description" label="分类详情"></el-table-column>
       <el-table-column prop="code" label="分类序号"></el-table-column>
-
       <el-table-column prop="icon" label="分类图标" width="100">
         <template #default="{row}">
           <el-image
@@ -34,7 +34,7 @@
             v-model="row.status"
             active-value="active"
             inactive-value="inactive"
-            @change="updateCategory(row)"
+            @change="toggle(row)"
           ></el-switch>
         </template>
       </el-table-column>
@@ -84,14 +84,17 @@
             <span v-else class="el-icon-upload"></span>
           </div>
           <image-crop-upload
-            url="https://httpbin.org/post"
-            :width="150"
-            :height="150"
+            url="/api/upload"
+            :headers="{
+              'X-Access-Token': getToken()
+            }"
+            :width="350"
+            :height="200"
             :outputFormat="'png'"
-            :scaleRatio="0.1"
+            :scaleRatio="1"
             v-model="showImageCropUpload"
             :field="'icon'"
-            @crop-success="cropSuccess"
+            @crop-upload-success="handleSuccess"
             @crop-cancel="resetImageCropUpload"
           ></image-crop-upload>
         </el-form-item>
@@ -108,14 +111,17 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { ComicCategoryData } from '@/api/types'
 import VueImageCropUpload from 'vue-image-crop-upload'
+import { UserModule } from '@/store/modules/user'
 import {
   addCategory,
   getCategories,
   deleteCategory,
-  updateSort
+  updateSort,
+  toggleStatus
 } from '@/api/category'
 import { Message } from 'element-ui'
 import Sortable from 'sortablejs'
+import { decryptImage } from '@/utils/AES'
 @Component({
   components: {
     // 在这里注册你需要使用的组件
@@ -127,7 +133,7 @@ export default class ComicCategory extends Vue {
   addCategoryDialogVisible = false;
   newCategory: ComicCategoryData = {};
   showImageCropUpload = false;
-
+  listLoading = true;
   dialogVisible = false;
   dialogTitle = '';
   formData: ComicCategoryData = {};
@@ -146,7 +152,7 @@ export default class ComicCategory extends Vue {
     icon: [
       {
         validator: (rules: any, value: any, callback: any) => {
-          if (!this.newCategory.icon) {
+          if (!this.newCategory.iconUrl) {
             callback(new Error('分类图标是必填项'))
           } else {
             callback()
@@ -158,7 +164,7 @@ export default class ComicCategory extends Vue {
   };
 
   async mounted() {
-    this.comicCategories = (await getCategories({})).data.list
+    await this.searchCategories()
     this.$nextTick(() => {
       this.setSort()
     })
@@ -200,11 +206,7 @@ export default class ComicCategory extends Vue {
     this.submitting = true;
     (this.$refs.form as any).validate(async(valid: boolean) => {
       if (valid) {
-        if (this.dialogTitle === '添加分类') {
-          this.submitNewCategory()
-        } else if (this.dialogTitle === '编辑分类') {
-          this.updateCategory(this.formData)
-        }
+        this.submitNewCategory()
       } else {
         Message.warning('表单验证未通过')
       }
@@ -212,16 +214,29 @@ export default class ComicCategory extends Vue {
     })
   }
 
+  // 查询方法
+  async searchCategories() {
+    this.listLoading = true
+    this.comicCategories = (await getCategories({})).data.list
+    // 在客户端解密图片
+    // 解密图片
+    const decryptedIcons = await Promise.all(
+      this.comicCategories.map(async(cc: any) => {
+        return await decryptImage(cc.iconUrl)
+      })
+    )
+
+    this.comicCategories = this.comicCategories.map((cc, index) => {
+      cc.icon = decryptedIcons[index]
+      return cc
+    })
+    this.listLoading = false
+  }
+
   // 重置对话框状态
   resetDialog() {
     this.showImageCropUpload = false
     this.formData = {}
-  }
-
-  // 更新分类
-  async updateCategory(row: ComicCategoryData) {
-    // 在这里实现更新
-    console.log(row)
   }
 
   // 删除分类
@@ -252,9 +267,10 @@ export default class ComicCategory extends Vue {
   }
 
   // 新方法：处理图片裁剪成功
-  async cropSuccess(imgDataUrl: string) {
-    this.newCategory.icon = imgDataUrl
-    this.formData.icon = imgDataUrl
+  async handleSuccess(response: any) {
+    // 上传后 解密
+    this.newCategory.iconUrl = response.data
+    this.formData.icon = await decryptImage(this.newCategory.iconUrl as string)
   }
 
   resetImageCropUpload() {
@@ -263,17 +279,26 @@ export default class ComicCategory extends Vue {
 
   async submitNewCategory() {
     // 验证表单
-
     // 在这里实现提交新分类数据的逻辑，例如调用 API
     try {
       const response = await addCategory(this.newCategory)
       this.comicCategories.push(response.data)
-      this.addCategoryDialogVisible = false
+      this.dialogVisible = false
       this.resetNewCategory()
+      this.$message.success('提交成功')
     } catch (error) {
       // 处理错误，例如显示一个错误消息
       console.error(error)
     }
+  }
+
+  async toggle(row: any) {
+    await toggleStatus({ id: row.id })
+    this.$message.success('设置成功')
+  }
+
+  getToken() {
+    return UserModule.token
   }
 
   private setSort() {
@@ -294,7 +319,7 @@ export default class ComicCategory extends Vue {
           this.submitting = true
           await updateSort({ from: evt.oldIndex, to: evt.newIndex })
           this.comicCategories = []
-          this.comicCategories = (await getCategories({})).data.list
+          await this.searchCategories()
           this.submitting = false
         }
       }

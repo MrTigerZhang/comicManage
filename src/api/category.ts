@@ -1,5 +1,4 @@
 import request from '@/utils/request'
-import { IArticleData } from './types'
 
 export const getCategories = (params: any) =>
   request({
@@ -24,6 +23,12 @@ export const addCategory = (params: any) =>
 export const updateSort = (params: any) =>
   request({
     url: '/cat/updateSort',
+    method: 'post',
+    params
+  })
+export const toggleStatus = (params: any) =>
+  request({
+    url: '/cat/toggleStatus',
     method: 'post',
     params
   })

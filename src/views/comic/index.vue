@@ -74,6 +74,7 @@
       border
       style="width: 100%"
       @sort-change="onSortChange"
+      v-loading="listLoading"
     >
       <el-table-column
         prop="id"
@@ -108,7 +109,7 @@
 
       <el-table-column prop="thumbnail" label="缩略图">
         <template #default="{row}">
-          <div @click="showImagePreview(row.thumbnail)">
+          <div  >
             <el-image
               :src="row.thumbnail"
               :preview-src-list="[row.thumbnail]"
@@ -167,11 +168,9 @@
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type="text" @click="openMangaEditor(scope.row.id)"
-            >编辑</el-button
+          <el-button type="text" @click="openMangaEditor(scope.row.id)">编辑</el-button
           >
-          <el-button type="text" @click="deleteManga(scope.row)"
-            >删除</el-button
+          <el-button type="text" @click="deleteManga(scope.row)">删除</el-button
           >
           <el-button type="text" @click="toggleBan(scope.row)">{{
             scope.row.banned ? "下架" : "上架"
@@ -214,6 +213,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import { decryptImage } from '@/utils/AES'
 import {
   getComicList,
   getCategorys,
@@ -237,12 +237,14 @@ export default class MangaManagement extends Vue {
   previewImageUrl = '';
   descriptionDialogVisible = false;
   selectedDescription = '';
+  listLoading = false;
   async mounted() {
     this.searchMangas()
     this.categories = await (await getCategorys({})).data
   }
 
   async searchMangas() {
+    this.listLoading = true
     const data = await getComicList({
       search: this.searchForm,
       currentPage: this.currentPage,
@@ -251,7 +253,19 @@ export default class MangaManagement extends Vue {
     })
     this.mangas = []
     this.mangas = data.data.list
+    const decryptedIcons = await Promise.all(
+      this.mangas.map(async(comic) => {
+        return await decryptImage(comic.thumbnailUrl)
+      })
+    )
+
+    this.mangas = this.mangas.map((comic, index) => {
+      comic.thumbnail = decryptedIcons[index]
+      return comic
+    })
+
     this.total = data.data.total
+    this.listLoading = false
   }
 
   // 打开漫画编辑页面

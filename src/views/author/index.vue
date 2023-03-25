@@ -27,17 +27,21 @@
         <el-button type="primary" @click="searchAuthors">查询</el-button>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="openDialog('add')"
-          >新增作者</el-button
+        <el-button type="primary" @click="openDialog('add')">新增作者</el-button
         >
       </el-form-item>
     </el-form>
 
     <!-- 作者列表 -->
-    <el-table :data="authors" border style="width: 100%">
-      <el-table-column prop="icon" label="头像">
+    <el-table
+      :data="authors"
+      border
+      style="width: 100%"
+      v-loading="listLoading"
+    >
+      <el-table-column prop="icon" label="头像ICON">
         <template #default="{row}">
-          <div @click="showImagePreview(row.icon)">
+          <div>
             <el-image
               :src="row.icon"
               :preview-src-list="[row.icon]"
@@ -66,8 +70,7 @@
           <el-button
             type="primary"
             size="mini"
-            @click="openDialog('edit', row)"
-          >
+            @click="openDialog('edit', row)" >
             编辑
           </el-button>
           <el-button type="danger" size="mini" @click="deleteAuthor(row)">
@@ -98,7 +101,7 @@
     >
       <el-form ref="form" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="头像" prop="icon">
-          <div @click="showImageCropUpload = !showImageCropUpload">
+          <div>
             <el-image
               v-if="formData.icon"
               :src="formData.icon"
@@ -109,14 +112,17 @@
             <span v-else class="el-icon-upload"></span>
           </div>
           <image-crop-upload
-            url="https://httpbin.org/post"
-            :width="150"
-            :height="150"
+            url="/api/upload"
+            :headers="{
+              'X-Access-Token': getToken()
+            }"
+            :width="300"
+            :height="300"
             :outputFormat="'png'"
-            :scaleRatio="0.1"
+            :scaleRatio="1"
             v-model="showImageCropUpload"
             :field="'icon'"
-            @crop-success="cropSuccess"
+            @crop-upload-success="uploadSuccess"
             @crop-cancel="resetImageCropUpload"
           ></image-crop-upload>
         </el-form-item>
@@ -135,25 +141,14 @@
         <el-button type="primary" @click="submitDialog">提交</el-button>
       </span>
     </el-dialog>
-
-    <!-- 图片预览对话框 -->
-    <el-dialog
-      title="图片预览"
-      :visible.sync="imagePreviewDialogVisible"
-      width="300px"
-    >
-      <el-image
-        :src="previewImageUrl"
-        :fit="'contain'"
-        class="image-preview"
-      ></el-image>
-    </el-dialog>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import VueImageCropUpload from 'vue-image-crop-upload'
+import { UserModule } from '@/store/modules/user'
+import { decryptImage } from '@/utils/AES'
 import {
   getAuthors,
   addAuthor,
@@ -172,8 +167,7 @@ export default class AuthorManagement extends Vue {
   currentPage = 1;
   pageSize = 10;
   total = 0;
-  previewImageUrl = ''; // Add this data property
-  imagePreviewDialogVisible = false; // Add this data property
+  private listLoading = true;
 
   searchForm = {
     name: '',
@@ -188,7 +182,7 @@ export default class AuthorManagement extends Vue {
     icon: [
       {
         validator: (rules: any, value: any, callback: any) => {
-          if (!this.formData.icon) {
+          if (!this.formData.iconUrl) {
             callback(new Error('头像是必填项'))
           } else {
             callback()
@@ -228,6 +222,7 @@ export default class AuthorManagement extends Vue {
 
     // 实现查询方法
     // 实现数据请求方法
+    this.listLoading = true
     const data = (
       await getAuthors({
         search: {
@@ -239,8 +234,22 @@ export default class AuthorManagement extends Vue {
         pageSize: this.pageSize
       })
     ).data
+    this.authors = []
+
     this.authors = data.list
+    const decryptedIcons = await Promise.all(
+      this.authors.map(async(author) => {
+        return await decryptImage(author.iconUrl)
+      })
+    )
+
+    this.authors = this.authors.map((author, index) => {
+      author.icon = decryptedIcons[index]
+      return author
+    })
+
     this.total = data.total
+    this.listLoading = false
   }
 
   handleSizeChange(val: number) {
@@ -279,9 +288,9 @@ export default class AuthorManagement extends Vue {
     this.showImageCropUpload = false
   }
 
-  cropSuccess(response: any) {
-    console.log(response)
-    this.formData.icon = response.data.url
+  async uploadSuccess(response: any) {
+    this.formData.iconUrl = response.data.url
+    this.formData.icon = await decryptImage(response.data.url)
     this.showImageCropUpload = false
   }
 
@@ -311,9 +320,8 @@ export default class AuthorManagement extends Vue {
     })
   }
 
-  showImagePreview(url: string) {
-    this.previewImageUrl = url
-    this.imagePreviewDialogVisible = true
+  getToken() {
+    return UserModule.token
   }
 }
 </script>

@@ -4,14 +4,15 @@
       {{ isEditMode ? "编辑漫画" : "新增漫画" }}
     </h3>
     <aside>
-        新增漫画后 ，刷新页面可以编辑章节内容哦
-        <br>
-      </aside>
+      新增漫画后 ，刷新页面可以编辑章节内容哦
+      <br />
+    </aside>
     <el-form
       ref="mangaForm"
       :model="mangaForm"
       :rules="rules"
       label-width="100px"
+      v-loading="listLoading"
     >
       <el-form-item label="名称" prop="name">
         <el-input v-model="mangaForm.name"></el-input>
@@ -73,7 +74,6 @@
             :preview-src-list="[mangaForm.thumbnail]"
             :fit="'contain'"
             style="width: 100px; height: 100px"
-            @click="showImagePreview(mangaForm.thumbnail)"
           ></el-image>
 
           <el-button type="text" @click="showImageCropUpload = true"
@@ -82,7 +82,10 @@
         </div>
         <image-crop-upload
           ref="imageCropper"
-          url="https://httpbin.org/post"
+          url="/api/upload"
+          :headers="{
+            'X-Access-Token': getToken()
+          }"
           :outputFormat="'png'"
           :scaleRatio="1"
           :autoCrop="false"
@@ -90,7 +93,7 @@
           :height="300"
           v-model="showImageCropUpload"
           :field="'icon'"
-          @crop-success="cropSuccess"
+          @crop-upload-success="uploadSuccess"
           @crop-cancel="resetImageCropUpload"
         ></image-crop-upload>
       </el-form-item>
@@ -135,6 +138,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import VueImageCropUpload from 'vue-image-crop-upload'
+import { decryptImage } from '@/utils/AES'
+import { UserModule } from '@/store/modules/user'
 import {
   getCategorys,
   getAuthors,
@@ -150,6 +155,7 @@ import ChapterManager from './cmps/ChapterManager.vue'
 })
 export default class MangaEditor extends Vue {
   isEditMode = false;
+  listLoading = false;
   mangaForm = {
     id: '',
     name: '',
@@ -160,7 +166,8 @@ export default class MangaEditor extends Vue {
     status: '',
     banned: false,
     tags: [] as string[],
-    tagsString: ''
+    tagsString: '',
+    thumbnailUrl: ''
   };
 
   imagePreviewDialogVisible = false;
@@ -204,11 +211,12 @@ export default class MangaEditor extends Vue {
   };
 
   async created() {
-    const id = this.$route.params.id
+    const id: string = this.$route.params.id as string
 
     this.categories = await (await getCategorys({})).data
     this.authors = (await getAuthors({})).data // 获取作者列表
-
+    console.log(id)
+    // 不能使用  !==
     if (id && id !== '-1') {
       this.isEditMode = true
       this.getComicDetails(id)
@@ -216,13 +224,17 @@ export default class MangaEditor extends Vue {
   }
 
   async getComicDetails(id: any) {
+    this.listLoading = true
     const data = (await getComicDetail(id)).data
-    console.log(data)
+
     this.mangaForm = data
+    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl)
+    this.listLoading = false
   }
 
-  cropSuccess(imgDataUrl: string) {
-    this.mangaForm.thumbnail = imgDataUrl
+  async uploadSuccess(response: any) {
+    this.mangaForm.thumbnailUrl = response.data
+    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl)
   }
 
   resetImageCropUpload() {
@@ -265,6 +277,10 @@ export default class MangaEditor extends Vue {
 
   get currentNameLength(): number {
     return this.mangaForm.name.length
+  }
+
+  getToken() {
+    return UserModule.token
   }
 }
 </script>

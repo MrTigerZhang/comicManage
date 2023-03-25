@@ -63,7 +63,13 @@
         </el-form-item>
       </el-form>
       <!-- 分页列表 -->
-      <el-table :data="chapters" @sort-change="handleSortChange" border stripe>
+      <el-table
+        :data="chapters"
+        @sort-change="handleSortChange"
+        border
+        stripe
+        v-loading="listLoading"
+      >
         <el-table-column label="章节ID" prop="id"></el-table-column>
         <el-table-column
           label="章节序号"
@@ -145,6 +151,7 @@
 <script lang="ts">
 import { Component, Vue, Prop } from 'vue-property-decorator'
 import { queryChapters, deleteChapter, toggleChapterStatus } from '@/api/comic'
+import { decryptImage } from '@/utils/AES'
 interface Chapter {
   id: number
   name: string
@@ -156,6 +163,7 @@ interface Chapter {
   createdAt: string
   updatedAt: string
   status: number
+  thumbnailUrl: string
 }
 
 interface SearchForm {
@@ -182,12 +190,13 @@ export default class ChapterManager extends Vue {
   totalItems = 0;
   currentPage = 1;
   pageSize = 10;
-
+  listLoading = false;
   async mounted() {
     this.searchChapters()
   }
 
   async searchChapters() {
+    this.listLoading = true
     try {
       const { list, total } = (
         await queryChapters({
@@ -197,7 +206,19 @@ export default class ChapterManager extends Vue {
         })
       ).data
       this.chapters = list
+      const decryptedIcons = await Promise.all(
+        this.chapters.map(async(chapter) => {
+          return await decryptImage(chapter.thumbnailUrl)
+        })
+      )
+
+      this.chapters = this.chapters.map((chapter, index) => {
+        chapter.thumbnail = decryptedIcons[index]
+        return chapter
+      })
+
       this.totalItems = total
+      this.listLoading = false
     } catch (error) {
       this.$message.error('查询章节失败')
     }
@@ -254,7 +275,11 @@ export default class ChapterManager extends Vue {
     const id = row == null ? '-1' : row.id
     this.$router.push({
       name: 'editorChapter',
-      params: { chapterId: id, comicId: this.comicId + '', comicTitle: this.title }
+      params: {
+        chapterId: id,
+        comicId: this.comicId + '',
+        comicTitle: this.title
+      }
     })
   }
 }
