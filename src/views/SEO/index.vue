@@ -1,6 +1,6 @@
 <template>
   <div class="components-container">
-    <el-form :model="form" ref="form" label-width="120px" :rules="rules">
+    <el-form :model="form" ref="form" label-width="120px" :rules="rules" v-loading="loading">
       <aside>
         网站的seo数据
         <br />
@@ -126,7 +126,6 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { getSystemInfo, setSystemInfo } from '@/api/settings'
 import { MessageBox } from 'element-ui'
-import { UserModule } from '@/store/modules/user'
 import { ElForm } from 'element-ui/types/form'
 
 @Component
