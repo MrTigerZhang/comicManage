@@ -165,7 +165,27 @@ export const constantRoutes: RouteConfig[] = [
         }
       }
     ]
-  }, { //   消息管理
+  },
+  //推荐管理 
+  {
+    path: '/recommend',
+    component: Layout,
+    redirect: '/recommend/index',
+    children: [
+      {
+        path: 'recommend',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/recommend/index.vue'),
+        name: 'recommend',
+        meta: {
+          title: 'recommend',
+          icon: 'example',
+          affix: true
+        }
+      }
+    ]
+  }
+
+  , { //   消息管理
     path: '/msg',
     component: Layout,
     redirect: '/msg/index',

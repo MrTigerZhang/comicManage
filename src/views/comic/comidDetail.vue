@@ -84,7 +84,7 @@
           ref="imageCropper"
           url="/api/upload"
           :headers="{
-            'X-Access-Token': getToken()
+            'X-Access-Token': getToken(),
           }"
           :outputFormat="'png'"
           :scaleRatio="1"
@@ -136,151 +136,151 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import VueImageCropUpload from 'vue-image-crop-upload'
-import { decryptImage } from '@/utils/AES'
-import { UserModule } from '@/store/modules/user'
+import { Component, Vue } from "vue-property-decorator";
+import VueImageCropUpload from "vue-image-crop-upload";
+import { decryptImage } from "@/utils/AES";
+import { UserModule } from "@/store/modules/user";
 import {
   getCategorys,
   getAuthors,
   getComicDetail,
-  addOrUpdateComic
-} from '@/api/comic'
-import ChapterManager from './cmps/ChapterManager.vue'
+  addOrUpdateComic,
+} from "@/api/comic";
+import ChapterManager from "./cmps/ChapterManager.vue";
 @Component({
   components: {
-    'image-crop-upload': VueImageCropUpload,
-    'chapter-manager': ChapterManager // 章节管理组件
-  }
+    "image-crop-upload": VueImageCropUpload,
+    "chapter-manager": ChapterManager, // 章节管理组件
+  },
 })
 export default class MangaEditor extends Vue {
   isEditMode = false;
   listLoading = false;
   mangaForm = {
-    id: '',
-    name: '',
-    category: '',
-    author: '',
-    description: '',
-    thumbnail: '',
-    status: '',
+    id: "",
+    name: "",
+    category: "",
+    author: "",
+    description: "",
+    thumbnail: "",
+    status: "",
     banned: false,
     tags: [] as string[],
-    tagsString: '',
-    thumbnailUrl: ''
+    tagsString: "",
+    thumbnailUrl: "",
   };
 
   imagePreviewDialogVisible = false;
   showImageCropUpload = false;
-  previewImageUrl = '';
+  previewImageUrl = "";
   comicId = this.$route.params.id ? parseInt(this.$route.params.id) : -1;
   categories = [];
   authors = []; // 添加一个authors数组来存储作者列表
 
   rules = {
     name: [
-      { required: true, message: '漫画名称是必填项', trigger: 'blur' },
+      { required: true, message: "漫画名称是必填项", trigger: "blur" },
       {
         min: 3,
         max: 64,
-        message: '漫画名称长度必须在 3 到 64 之间',
-        trigger: 'blur'
-      }
+        message: "漫画名称长度必须在 3 到 64 之间",
+        trigger: "blur",
+      },
     ],
     category: [
-      { required: true, message: '漫画分类是必填项', trigger: 'change' }
+      { required: true, message: "漫画分类是必填项", trigger: "change" },
     ],
     author: [
-      { required: true, message: '漫画作者是必填项', trigger: 'change' }
+      { required: true, message: "漫画作者是必填项", trigger: "change" },
     ],
     description: [
-      { required: true, message: '漫画简介是必填项', trigger: 'change' },
+      { required: true, message: "漫画简介是必填项", trigger: "change" },
       {
         min: 30,
         max: 256,
-        message: '漫画简介长度必须在 30 到 256 之间',
-        trigger: 'blur'
-      }
+        message: "漫画简介长度必须在 30 到 256 之间",
+        trigger: "blur",
+      },
     ],
     status: [
-      { required: true, message: '连载状态是必填项', trigger: 'change' }
+      { required: true, message: "连载状态是必填项", trigger: "change" },
     ],
     thumbnail: [
-      { required: true, message: '缩略图不能为空', trigger: 'change' }
-    ]
+      { required: true, message: "缩略图不能为空", trigger: "change" },
+    ],
   };
 
   async created() {
-    const id: string = this.$route.params.id as string
+    const id:string = this.$route.params.id as string;
 
-    this.categories = await (await getCategorys({})).data
-    this.authors = (await getAuthors({})).data // 获取作者列表
-    console.log(id)
-    // 不能使用  !==
-    if (id && id !== '-1') {
-      this.isEditMode = true
-      this.getComicDetails(id)
+    this.categories = await (await getCategorys({})).data;
+    this.authors = (await getAuthors({})).data; // 获取作者列表
+    console.log(id);
+    //不能使用  !==
+    if (id &&  "-1" != id) {
+      this.isEditMode = true;
+      this.getComicDetails(id);
     }
   }
 
   async getComicDetails(id: any) {
-    this.listLoading = true
-    const data = (await getComicDetail(id)).data
+    this.listLoading = true;
+    const data = (await getComicDetail(id)).data;
 
-    this.mangaForm = data
-    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl)
-    this.listLoading = false
+    this.mangaForm = data;
+    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl);
+    this.listLoading = false;
   }
 
   async uploadSuccess(response: any) {
-    this.mangaForm.thumbnailUrl = response.data
-    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl)
+    this.mangaForm.thumbnailUrl = response.data;
+    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl);
   }
 
   resetImageCropUpload() {
-    this.showImageCropUpload = false
+    this.showImageCropUpload = false;
   }
 
   async submitForm() {
-    (this.$refs.mangaForm as any).validate(async(valid: boolean) => {
+    (this.$refs.mangaForm as any).validate(async (valid: boolean) => {
       if (valid) {
-        const result = await addOrUpdateComic(this.mangaForm)
+        const result = await addOrUpdateComic(this.mangaForm);
         if (result) {
-          this.$message.success('添加成功')
+          this.$message.success("添加成功");
           // 关闭当前页面并导航到目标页面（例如，返回到漫画列表页）
-          this.$router.go(0)
-          this.mangaForm.id = result.data.comicId
-          this.comicId = result.data.comicId
-          this.isEditMode = true
+          this.$router.go(0);
+          this.mangaForm.id = result.data.comicId;
+          this.comicId = result.data.comicId;
+          this.isEditMode = true;
         } else {
-          this.$message.error('添加失败')
+          this.$message.error("添加失败");
         }
       }
-    })
+    });
   }
 
   handleTagsInput() {
     this.mangaForm.tags = this.mangaForm.tagsString
-      .split(',')
+      .split(",")
       .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0)
+      .filter((tag) => tag.length > 0);
   }
 
   handleTagClose(index: any) {
-    this.mangaForm.tags.splice(index, 1)
-    this.mangaForm.tagsString = this.mangaForm.tags.join(', ')
+    this.mangaForm.tags.splice(index, 1);
+    this.mangaForm.tagsString = this.mangaForm.tags.join(", ");
   }
 
   get currentDescriptionLength(): number {
-    return this.mangaForm.description.length
+    return this.mangaForm.description.length;
   }
 
   get currentNameLength(): number {
-    return this.mangaForm.name.length
+    return this.mangaForm.name.length;
   }
 
   getToken() {
-    return UserModule.token
+    return UserModule.token;
   }
 }
 </script>

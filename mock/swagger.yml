@@ -1152,7 +1152,23 @@ paths:
                 properties:
                   message:
                     type: string  
-                    
+  /recommend/list:
+    post:
+      tags: list
+      summary: ceshi
+      description:  
+      operationId: getList
+      responses:
+        "200":
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string   
+                     
                                     
 components:
   securitySchemes:

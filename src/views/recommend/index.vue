@@ -1,0 +1,276 @@
+<template>
+  <!-- 创建一个用于管理推荐的模块  -->
+  <div class="components-container">
+    <!-- 顶部的搜索框 -->
+    <el-form :inline="true" :model="searchForm" class="search-form">
+      <el-form-item label="推荐名称">
+        <el-input
+          v-model="searchForm.name"
+          placeholder="请输入推荐名称"
+        ></el-input>
+      </el-form-item>
+      <!-- 清空查询条件 -->
+      <el-form-item>
+        <el-button type="primary" @click="resetSearchForm">清空</el-button>
+      </el-form-item>
+      <!-- 搜索按钮 -->
+      <el-form-item>
+        <el-button type="primary" @click="search">搜索</el-button>
+      </el-form-item>
+      <!-- 新增按钮 -->
+      <el-form-item>
+        <el-button type="primary" @click="showEditRecommendDialog"
+          >新增</el-button
+        >
+      </el-form-item>
+    </el-form>
+    <!-- 顶部的搜索框 -->
+    <!-- 表格 -->
+    <el-table :data="recommendList" border stripe v-loaing="listLoading">
+      <el-table-column label="推荐名称" prop="name"></el-table-column>
+        <el-table-column label="推荐类型" prop="type">
+            <template slot-scope="{ row }">
+                <el-tag v-if="row.type === 1">首页6</el-tag>
+                <el-tag v-else-if="row.type === 2">首页3</el-tag>
+                <el-tag v-else-if="row.type === 3">首页4</el-tag>
+            </template>
+        </el-table-column>
+      <el-table-column label="推荐内容">
+        <template slot-scope="{ row }">
+          <el-tag
+            v-for="item in row.content"
+            :key="item.id"
+            closable
+            @close="deleteContent(row, item)"
+          >
+            {{ item.name }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="{ row }">
+          <el-button
+            size="mini"
+            type="text"
+            @click="showEditRecommendDialog(row)"
+            >编辑</el-button
+          >
+          <el-button size="mini" type="text" @click="deleteRecommend(row)"
+            >删除</el-button
+          >
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 表格 -->
+    <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="searchForm.page"
+      :page-sizes="[10, 20, 30, 40]"
+      :page-size="searchForm.limit"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+    >
+    </el-pagination>
+    <!-- 分页 -->
+    <!-- 添加推荐的对话框 -->
+    <el-dialog title="添加推荐" :visible.sync="addRecommendDialogVisible">
+      <el-form
+        :model="addRecommendForm"
+        ref="addRecommendFormRef"
+        label-width="80px"
+      >
+        <el-form-item label="推荐名称" prop="name">
+          <el-input v-model="addRecommendForm.name"></el-input>
+        </el-form-item>
+        <el-form-item label="推荐类型" prop="type">
+          <el-radio-group v-model="addRecommendForm.type">
+            <el-radio label="1">首页6</el-radio>
+            <el-radio label="2">首页3</el-radio>
+            <el-radio label="3">首页4</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="推荐内容" prop="content">
+          <el-select
+            v-model="addRecommendForm.content"
+            multiple
+            placeholder="请选择推荐内容"
+          >
+            <el-option
+              v-for="item in addRecommendForm.type === '1'
+                ? comicList
+                : novelList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            >
+            </el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addRecommendDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addRecommend">确 定</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script  lang ="ts">
+import { Component, Vue } from "vue-property-decorator";
+import {
+  getRecommendList,
+  addRecommend,
+  deleteRecommend,
+  editRecommend,
+} from "@/api/recommend";
+import { getComicList } from "@/api/comic";
+
+@Component({
+  components: {},
+})
+export default class Recommend extends Vue {
+  // 表格加载状态
+  listLoading = false;
+  // 搜索表单
+  searchForm = {
+    name: "",
+    type: "",
+    page: 1,
+    limit: 10,
+  };
+  // 推荐列表
+  recommendList: any[] = [];
+  // 总条数
+  total = 0;
+  // 添加推荐的对话框
+  addRecommendDialogVisible = false;
+  // 添加推荐的表单
+  addRecommendForm = {
+    name: "",
+    type: "1",
+    content: [],
+  };
+  // 漫画列表
+  comicList: any[] = [];
+  // 小说列表
+  novelList: any[] = [];
+
+  // 搜索
+  search() {
+    this.searchForm.page = 1;
+    this.getRecommendList();
+  }
+
+  // 获取推荐列表
+  getRecommendList() {
+    this.listLoading = true;
+    getRecommendList(this.searchForm).then((res: any) => {
+      this.recommendList = res.data.list;
+      this.total = res.data.total;
+      this.listLoading = false;
+    });
+  }
+
+  // 漫画列表
+  getComicList() {
+    this.listLoading = true;
+
+    getComicList({ page: 1, limit: 1000 }).then((res: any) => {
+      this.comicList = res.data.list;
+      this.listLoading = false;
+    });
+  }
+
+  // 小说列表
+  getNovelList() {
+    this.listLoading = true;
+    getComicList({ page: 1, limit: 1000 }).then((res: any) => {
+      this.novelList = res.data.list;
+      this.listLoading = false;
+    });
+  }
+
+  // 添加推荐
+  addRecommend() {
+    (this.$refs.addRecommendFormRef as any).validate((valid: boolean) => {
+      if (valid) {
+        addRecommend(this.addRecommendForm).then((res: any) => {
+          this.$message.success("添加成功");
+          this.addRecommendDialogVisible = false;
+          this.getRecommendList();
+        });
+      }
+    });
+  }
+
+  // 删除推荐
+  deleteRecommend(row: any) {
+    this.$confirm("此操作将永久删除该推荐, 是否继续?", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(() => {
+      deleteRecommend(row.id).then((res: any) => {
+        this.$message.success("删除成功");
+        this.getRecommendList();
+      });
+    });
+  }
+
+  // 显示编辑推荐的对话框
+  showEditRecommendDialog(row: any) {
+    this.addRecommendDialogVisible = true;
+    this.addRecommendForm = {
+      name: row.name,
+      type: row.type,
+      content: row.content.map((item: any) => item.id),
+    };
+  }
+
+  // 编辑推荐
+  editRecommend() {
+    (this.$refs.addRecommendFormRef as any).validate((valid: boolean) => {
+      if (valid) {
+        editRecommend(this.addRecommendForm).then((res: any) => {
+          this.$message.success("编辑成功");
+          this.addRecommendDialogVisible = false;
+          this.getRecommendList();
+        });
+      }
+    });
+  }
+
+  handleSizeChange(val: number) {
+    this.searchForm.limit = val;
+    this.getRecommendList();
+  }
+
+  handleCurrentChange(val: number) {
+    this.searchForm.page = val;
+    this.getRecommendList();
+  }
+
+  created() {
+    this.getRecommendList();
+    this.getComicList();
+    this.getNovelList();
+  }
+  resetSearchForm() {
+    this.searchForm = {
+      name: "",
+      type: "",
+      page: 1,
+      limit: 10,
+    };
+  }
+
+  //删除推荐内容项
+  deleteContentItem(index: number) {
+    this.addRecommendForm.content.splice(index, 1);
+    //提交表单
+    this.addRecommend();
+  }
+}
+</script>
