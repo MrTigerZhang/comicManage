@@ -15,13 +15,15 @@ export const setIndexAd = (data: any) =>
 
 export const getSystemInfo = () =>
   request({
-    url: '/settings/getSystemInfo',
+    url: '/system/config',
     method: 'post'
   })
 
 export const setSystemInfo = (data: any) =>
   request({
-    url: '/settings/setSystemInfo',
+    url: '/system/update',
     method: 'post',
-    data
+    data: {
+      data: data,
+    }
   })

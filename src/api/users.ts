@@ -7,11 +7,10 @@ export const getUsers = (params: any) =>
     params
   })
 
-export const getUserInfo = (data: any) =>
+export const getUserInfo = () =>
   request({
-    url: '/users/info',
+    url: '/sys/user/info',
     method: 'post',
-    data
   })
 
 export const getUserByName = (username: string) =>
@@ -35,14 +34,18 @@ export const deleteUser = (username: string) =>
 
 export const login = (data: any) =>
   request({
-    url: '/users/login',
+    url: '/login',
     method: 'post',
-    data
+    data: {
+      data: data,
+      page: 1,
+      size: 0
+    }
   })
 
 export const logout = () =>
   request({
-    url: '/users/logout',
+    url: '/logout',
     method: 'post'
   })
 
@@ -51,4 +54,10 @@ export const register = (data: any) =>
     url: '/users/register',
     method: 'post',
     data
+  })
+
+export const getSystemConfig = () =>
+  request({
+    url: '/system/config',
+    method: 'post'
   })

@@ -1,5 +1,5 @@
 import { VuexModule, Module, Action, Mutation, getModule } from 'vuex-module-decorators'
-import { login, logout, getUserInfo } from '@/api/users'
+import { login, logout, getUserInfo, getSystemConfig } from '@/api/users'
 import { getToken, setToken, removeToken } from '@/utils/cookies'
 import router, { resetRouter } from '@/router'
 import { PermissionModule } from './permission'
@@ -23,6 +23,25 @@ class User extends VuexModule implements IUserState {
   public introduction = ''
   public roles: string[] = []
   public email = ''
+  //系统加密配置
+  public systemConfig: any = {
+
+  }
+
+  @Action
+  public async GetSystemConfig() {
+    const { data } = await getSystemConfig()
+    console.log("data:::::::", data)
+    this.SET_SYSTEM_CONFIG(data)
+
+  }
+
+  @Mutation
+  SET_SYSTEM_CONFIG(data: any) {
+    this.systemConfig = data
+  }
+
+
 
   @Mutation
   private SET_TOKEN(token: string) {
@@ -55,12 +74,12 @@ class User extends VuexModule implements IUserState {
   }
 
   @Action
-  public async Login(userInfo: { username: string, password: string}) {
-    let { username, password } = userInfo
+  public async Login(userInfo: { username: string, password: string, captcha: string }) {
+    let { username, password, captcha } = userInfo
     username = username.trim()
-    const { data } = await login({ username, password })
-    setToken(data.accessToken)
-    this.SET_TOKEN(data.accessToken)
+    const { data } = await login({ username, password, captcha })
+    setToken(data.token)
+    this.SET_TOKEN(data.token)
   }
 
   @Action
@@ -79,16 +98,19 @@ class User extends VuexModule implements IUserState {
     if (!data) {
       throw Error('Verification failed, please Login again.')
     }
-    const { roles, name, avatar, introduction, email } = data.user
+    const { roles, username, avatar } = data
     // roles must be a non-empty array
     if (!roles || roles.length <= 0) {
       throw Error('GetUserInfo: roles must be a non-null array!')
     }
+
+    //获取系统配置
+    await this.GetSystemConfig();
     this.SET_ROLES(roles)
-    this.SET_NAME(name)
+    this.SET_NAME(username)
     this.SET_AVATAR(avatar)
-    this.SET_INTRODUCTION(introduction)
-    this.SET_EMAIL(email)
+    // this.SET_INTRODUCTION(introduction)
+    // this.SET_EMAIL(email)
   }
 
   @Action

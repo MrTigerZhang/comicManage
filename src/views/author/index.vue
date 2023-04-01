@@ -116,12 +116,13 @@
             :headers="{
               'X-Access-Token': getToken()
             }"
+          
             :width="300"
             :height="300"
             :outputFormat="'png'"
             :scaleRatio="1"
             v-model="showImageCropUpload"
-            :field="'icon'"
+            :field="'file'"
             @crop-upload-success="uploadSuccess"
             @crop-cancel="resetImageCropUpload"
           ></image-crop-upload>

@@ -1,4 +1,6 @@
+ 
 <template>
+  <!-- 这段代码非常的混乱 请不要学习 -->
   <div class="components-container">
     <!-- 添加分类按钮 -->
     <el-button type="primary" @click="openDialog('add')">添加分类</el-button>
@@ -19,7 +21,7 @@
       <el-table-column prop="description" label="分类详情"></el-table-column>
       <el-table-column prop="code" label="分类序号"></el-table-column>
       <el-table-column prop="icon" label="分类图标" width="100">
-        <template #default="{row}">
+        <template #default="{ row }">
           <el-image
             :src="row.icon"
             :preview-src-list="[row.icon]"
@@ -28,12 +30,12 @@
           ></el-image>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" width="100">
-        <template #default="{row}">
+      <el-table-column prop="status" label="启用" width="100">
+        <template #default="{ row }">
           <el-switch
             v-model="row.status"
-            active-value="active"
-            inactive-value="inactive"
+            :active-value="1"
+            :inactive-value="0"
             @change="toggle(row)"
           ></el-switch>
         </template>
@@ -44,7 +46,7 @@
         </template>
       </el-table-column>
       <el-table-column label="操作" width="160">
-        <template #default="{row}">
+        <template #default="{ row }">
           <el-button type="primary" size="mini" @click="openDialog('edit', row)"
             >编辑</el-button
           >
@@ -84,16 +86,16 @@
             <span v-else class="el-icon-upload"></span>
           </div>
           <image-crop-upload
-            url="/api/upload"
+            :url="uploadUrl"
             :headers="{
-              'X-Access-Token': getToken()
+              'X-Access-Token': getToken(),
             }"
             :width="350"
             :height="200"
             :outputFormat="'png'"
             :scaleRatio="1"
             v-model="showImageCropUpload"
-            :field="'icon'"
+            :field="'file'"
             @crop-upload-success="handleSuccess"
             @crop-cancel="resetImageCropUpload"
           ></image-crop-upload>
@@ -108,25 +110,26 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { ComicCategoryData } from '@/api/types'
-import VueImageCropUpload from 'vue-image-crop-upload'
-import { UserModule } from '@/store/modules/user'
+import { Component, Vue } from "vue-property-decorator";
+import { ComicCategoryData } from "@/api/types";
+import VueImageCropUpload from "vue-image-crop-upload";
+import { UserModule } from "@/store/modules/user";
 import {
   addCategory,
   getCategories,
+  updateCategory,
   deleteCategory,
   updateSort,
-  toggleStatus
-} from '@/api/category'
-import { Message } from 'element-ui'
-import Sortable from 'sortablejs'
-import { decryptImage } from '@/utils/AES'
+  toggleStatus,
+} from "@/api/category";
+import { Message } from "element-ui";
+import Sortable from "sortablejs";
+import { decryptImage } from "@/utils/AES";
 @Component({
   components: {
     // 在这里注册你需要使用的组件
-    'image-crop-upload': VueImageCropUpload
-  }
+    "image-crop-upload": VueImageCropUpload,
+  },
 })
 export default class ComicCategory extends Vue {
   comicCategories: ComicCategoryData[] = [];
@@ -135,195 +138,262 @@ export default class ComicCategory extends Vue {
   showImageCropUpload = false;
   listLoading = true;
   dialogVisible = false;
-  dialogTitle = '';
+  dialogTitle = "";
   formData: ComicCategoryData = {};
-
+  uploadUrl = process.env.VUE_APP_BASE_API + "/api/upload";
   submitting = false;
   private sortable: Sortable | null = null;
   rules = {
-    name: [{ required: true, message: '分类名称是必填项', trigger: 'blur' }],
+    name: [{ required: true, message: "分类名称是必填项", trigger: "blur" }],
     description: [
-      { required: true, message: '分类详情是必填项', trigger: 'blur' }
+      { required: true, message: "分类详情是必填项", trigger: "blur" },
     ],
     code: [
-      { required: true, message: '分类序号是必填项', trigger: 'blur' },
-      { type: 'number', message: '分类序号必须为数值', trigger: 'blur' }
+      { required: true, message: "分类序号是必填项", trigger: "blur" },
+      { type: "number", message: "分类序号必须为数值", trigger: "blur" },
     ],
     icon: [
       {
         validator: (rules: any, value: any, callback: any) => {
           if (!this.newCategory.iconUrl) {
-            callback(new Error('分类图标是必填项'))
+            callback(new Error("分类图标是必填项"));
           } else {
-            callback()
+            callback();
           }
         },
-        trigger: 'change'
-      }
-    ]
+        trigger: "change",
+      },
+    ],
   };
 
   async mounted() {
-    await this.searchCategories()
+    await this.searchCategories();
     this.$nextTick(() => {
-      this.setSort()
-    })
+      this.setSort();
+    });
   }
 
   // 添加分类
   addCategory() {
     if (this.submitting) {
-      return
+      return;
     }
-    this.submitting = true
-    this.addCategoryDialogVisible = true
-    this.submitting = false
+    this.submitting = true;
+    this.addCategoryDialogVisible = true;
+    this.submitting = false;
   }
 
   // 打开添加/编辑对话框
   openDialog(type: string, category?: ComicCategoryData) {
     if (this.submitting) {
-      return
+      return;
     }
-    this.submitting = true
+    this.submitting = true;
 
-    if (type === 'add') {
-      this.dialogTitle = '添加分类'
-      this.formData = {}
-    } else if (type === 'edit') {
-      this.dialogTitle = '编辑分类'
-      this.formData = { ...category }
+    if (type === "add") {
+      this.dialogTitle = "添加分类";
+      this.formData = {};
+    } else if (type === "edit") {
+      this.dialogTitle = "编辑分类";
+      this.formData = { ...category };
+      this.newCategory.iconUrl = this.formData.iconUrl;
     }
-    this.dialogVisible = true
-    this.submitting = false
+    this.dialogVisible = true;
+    this.submitting = false;
   }
 
   // 提交添加/编辑对话框
   submitDialog() {
     if (this.submitting) {
-      return
+      return;
     }
     this.submitting = true;
-    (this.$refs.form as any).validate(async(valid: boolean) => {
+    (this.$refs.form as any).validate(async (valid: boolean) => {
       if (valid) {
-        this.submitNewCategory()
+        if (this.dialogTitle === "添加分类") {
+          this.submitNewCategory();
+        } else if (this.dialogTitle === "编辑分类") {
+          this.submitUpdateCategory();
+        }
       } else {
-        Message.warning('表单验证未通过')
+        Message.warning("表单验证未通过");
       }
-      this.submitting = false
-    })
+      this.submitting = false;
+    });
   }
 
   // 查询方法
   async searchCategories() {
-    this.listLoading = true
-    this.comicCategories = (await getCategories({})).data.list
+    this.listLoading = true;
+    this.comicCategories = (await getCategories({})).data.dataList;
     // 在客户端解密图片
     // 解密图片
     const decryptedIcons = await Promise.all(
-      this.comicCategories.map(async(cc: any) => {
-        return await decryptImage(cc.iconUrl)
+      this.comicCategories.map(async (cc: any) => {
+        return await decryptImage(cc.iconUrl);
       })
-    )
+    );
 
     this.comicCategories = this.comicCategories.map((cc, index) => {
-      cc.icon = decryptedIcons[index]
-      return cc
-    })
-    this.listLoading = false
+      // 用解密后的图片替换原来的图片
+      cc.iconUrl = cc.icon;
+      cc.icon = decryptedIcons[index];
+      return cc;
+    });
+    this.listLoading = false;
   }
 
   // 重置对话框状态
   resetDialog() {
-    this.showImageCropUpload = false
-    this.formData = {}
+    this.showImageCropUpload = false;
+    this.formData = {};
   }
 
   // 删除分类
   async deleteCategory(category: ComicCategoryData) {
     if (this.submitting) {
-      return
+      return;
     }
 
-    this.$confirm('确定删除该分类吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(async() => {
+    this.$confirm("确定删除该分类吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(async () => {
       // 在这里实现删除分类的逻辑
-      this.submitting = true
-      await deleteCategory(category.id)
-      this.submitting = false
-    })
+      this.submitting = true;
+      await deleteCategory({ id: category.id });
+      this.submitting = false;
+      this.searchCategories();
+    });
   }
 
   // 重置 newCategory 对象
   resetNewCategory() {
-    this.newCategory = {}
+    this.newCategory = {};
+    this.formData = {};
+    (this.$refs.form as any).resetFields();
   }
 
   resetDialogState() {
-    this.showImageCropUpload = false
+    this.showImageCropUpload = false;
   }
 
-  // 新方法：处理图片裁剪成功
+  // 新方法：处理图片上传成功
   async handleSuccess(response: any) {
     // 上传后 解密
-    this.newCategory.iconUrl = response.data
-    this.formData.icon = await decryptImage(this.newCategory.iconUrl as string)
+    this.formData.iconUrl = response.data.key;
+    this.newCategory.iconUrl = response.data.key;
+    this.formData.icon = await decryptImage(response.data.url as string);
   }
 
   resetImageCropUpload() {
-    this.showImageCropUpload = false
+    this.showImageCropUpload = false;
   }
 
   async submitNewCategory() {
     // 验证表单
     // 在这里实现提交新分类数据的逻辑，例如调用 API
     try {
-      const response = await addCategory(this.newCategory)
-      this.comicCategories.push(response.data)
-      this.dialogVisible = false
-      this.resetNewCategory()
-      this.$message.success('提交成功')
+      const response = await addCategory({
+        name: this.formData.name,
+        description: this.formData.description,
+        code: this.formData.code,
+        icon: this.formData.iconUrl,
+      });
+
+      this.resetNewCategory();
+      this.$message.success("提交成功");
+      //关闭弹框 刷新列表
+      this.resetDialog();
+      this.addCategoryDialogVisible = false;
+      this.dialogVisible = false;
+      this.searchCategories();
     } catch (error) {
       // 处理错误，例如显示一个错误消息
-      console.error(error)
+      console.error(error);
+    }
+  }
+
+  async submitUpdateCategory() {
+    // 验证表单
+    // 在这里实现提交新分类数据的逻辑，例如调用 API
+    try {
+      const response = await updateCategory({
+        id: this.formData.id,
+        name: this.formData.name,
+        description: this.formData.description,
+        code: this.formData.code,
+        icon: this.formData.iconUrl,
+      });
+
+      this.resetNewCategory();
+      this.$message.success("更新成功");
+      //关闭弹框 刷新列表
+      this.resetDialog();
+      this.addCategoryDialogVisible = false;
+      this.dialogVisible = false;
+      this.searchCategories();
+    } catch (error) {
+      // 处理错误，例如显示一个错误消息
+      console.error(error);
     }
   }
 
   async toggle(row: any) {
-    await toggleStatus({ id: row.id })
-    this.$message.success('设置成功')
+    //询问是否要设置
+    await this.$confirm(
+      `确定要${row.status === 1 ? "启用" : "禁用"}该分类吗？`,
+      "提示",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }
+    )
+      .then(async () => {
+        await toggleStatus({ id: row.id });
+
+        this.$message.success("设置成功");
+      })
+      .catch(() => {
+        this.$message.info("已取消设置");
+      })
+      .finally(() => {
+        this.searchCategories();
+      });
   }
 
   getToken() {
-    return UserModule.token
+    return UserModule.token;
   }
 
   private setSort() {
     const el = (this.$refs.form as Vue).$el.querySelectorAll(
-      '.el-table__body-wrapper > table > tbody'
-    )[0] as HTMLElement
+      ".el-table__body-wrapper > table > tbody"
+    )[0] as HTMLElement;
     this.sortable = Sortable.create(el, {
-      ghostClass: 'sortable-ghost', // Class name for the drop placeholder
-      onEnd: async(evt) => {
+      ghostClass: "sortable-ghost", // Class name for the drop placeholder
+      onEnd: async (evt) => {
         if (
-          typeof evt.oldIndex !== 'undefined' &&
-          typeof evt.newIndex !== 'undefined'
+          typeof evt.oldIndex !== "undefined" &&
+          typeof evt.newIndex !== "undefined"
         ) {
           if (this.submitting) {
-            return
+            return;
           }
-          console.log('提交排序方法')
-          this.submitting = true
-          await updateSort({ from: evt.oldIndex, to: evt.newIndex })
-          this.comicCategories = []
-          await this.searchCategories()
-          this.submitting = false
+          console.log("提交排序方法");
+          //获取oldIndex 和 newIndex  的id
+          const oldId = this.comicCategories[evt.oldIndex].id;
+          const newId = this.comicCategories[evt.newIndex].id;
+          this.submitting = true;
+          await updateSort({ id: oldId, anotherId: newId });
+          this.comicCategories = [];
+          await this.searchCategories();
+          this.submitting = false;
         }
-      }
-    })
+      },
+    });
   }
 }
 </script>

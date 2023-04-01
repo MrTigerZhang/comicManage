@@ -32,10 +32,10 @@
             v-model="filterForm.paymentMethod"
             placeholder="请选择支付方式"
           >
-            <el-option label="支付宝" value="alipay"></el-option>
-            <el-option label="微信" value="wechat"></el-option>
-            <el-option label="银行卡" value="bank_card"></el-option>
-            <el-option label="手动支付" value="hand"></el-option>
+            <el-option label="支付宝" value="1"></el-option>
+            <el-option label="微信" value="2"></el-option>
+            <el-option label="其他" value="4"></el-option>
+            <el-option label="手动支付" value="3"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="支付日期">

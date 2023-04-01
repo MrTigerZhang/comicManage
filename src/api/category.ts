@@ -2,33 +2,40 @@ import request from '@/utils/request'
 
 export const getCategories = (params: any) =>
   request({
-    url: '/cat/get',
+    url: '/category/list',
     method: 'post',
     params
   })
 
 export const deleteCategory = (params: any) =>
   request({
-    url: '/cat/delete',
+    url: '/category/delete',
     method: 'post',
-    params
+    data: params
   })
 export const addCategory = (params: any) =>
   request({
-    url: '/cat/add',
+    url: '/category/add',
     method: 'post',
-    params
+    data: params
+  })
+
+export const updateCategory = (params: any) =>
+  request({
+    url: '/category/update',
+    method: 'post',
+    data: params
   })
 
 export const updateSort = (params: any) =>
   request({
-    url: '/cat/updateSort',
+    url: '/category/sort',
     method: 'post',
-    params
+    data: params
   })
 export const toggleStatus = (params: any) =>
   request({
-    url: '/cat/toggleStatus',
+    url: '/category/toggleStatus',
     method: 'post',
-    params
+    data:params
   })

@@ -13,8 +13,8 @@
         </el-form-item>
         <el-form-item label="消息状态">
           <el-select v-model="queryForm.status" placeholder="请选择">
-            <el-option label="已读" value="read"></el-option>
-            <el-option label="未读" value="unread"></el-option>
+            <el-option label="已读" value="1"></el-option>
+            <el-option label="未读" value="0"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -28,7 +28,7 @@
       <el-table-column prop="title" label="消息标题">
         <template #default="{row}">
           <span  >{{ row.title }}</span>
-          <span v-if="row.status === 'unread'" class="red-dot"></span>
+          <span v-if="row.status === '0'" class="red-dot"></span>
         </template>
       </el-table-column>
       <el-table-column

@@ -24,3 +24,4 @@ const settings: ISettings = {
 }
 
 export default settings
+export const BASE_URL: string = 'http://localhost:8090/mgr'

@@ -4,14 +4,14 @@ import request from '@/utils/request'
 
 export const getUserList = (data: any) =>
   request({
-    url: '/user/query',
+    url: '/user/list',
     method: 'post',
     data
   })
 export const enableUser = (data: any) => {
   request({
-    url: '/user/eanble',
+    url: '/user/disable',
     method: 'post',
-    data
+    data: { data }
   })
 }

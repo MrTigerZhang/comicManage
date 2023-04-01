@@ -59,5 +59,9 @@ export interface ComicCategoryData {
   sortOrder?: number
   icon?: string
   iconUrl?: string
+  
   status?: 'active' | 'inactive'
 }
+
+
+
