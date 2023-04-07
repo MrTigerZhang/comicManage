@@ -2,35 +2,35 @@ import request from '@/utils/request'
 
 export const getAuthors = (params: any) =>
   request({
-    url: '/author/get',
+    url: '/sys/author/list',
     method: 'post',
-    params
+    data: params
   })
 
 export const addAuthor = (params: any) =>
   request({
-    url: '/author/add',
+    url: '/sys/author/add',
     method: 'post',
-    params
+    data: params
   })
 
 export const updateAuthor = (params: any) =>
   request({
-    url: '/author/update',
+    url: '/sys/author/update',
     method: 'post',
-    params
+    data: params
   })
 
 export const deleteAuthor = (params: any) =>
   request({
-    url: '/author/delete',
+    url: '/sys/author/delete',
     method: 'post',
-    params
+    data: params
   })
 
 export const toggleAuthorStatus = (params: any) =>
   request({
-    url: '/author/toggleAuthorStatus',
+    url: '/sys/author/toggleStatus',
     method: 'post',
-    params
+    data: params
   })

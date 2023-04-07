@@ -10,27 +10,27 @@
           <el-option
             v-for="(category, index) in categories"
             :key="index"
-            :label="category.label"
-            :value="category.value"
+            :label="category.name"
+            :value="category.id"
           ></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="作者">
-        <el-input v-model="searchForm.author"></el-input>
+        <el-input v-model="searchForm.authorName"></el-input>
       </el-form-item>
 
       <el-form-item label="连载状态">
         <el-select v-model="searchForm.status" placeholder="请选择">
           <el-option label="请选择" value=""></el-option>
-          <el-option label="连载中" value="ongoing"></el-option>
-          <el-option label="已完结" value="completed"></el-option>
+          <el-option label="连载中" value="1"></el-option>
+          <el-option label="已完结" value="2"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="上架状态">
-        <el-select v-model="searchForm.banned" placeholder="请选择">
+        <el-select v-model="searchForm.enable" placeholder="请选择">
           <el-option label="请选择" value=""></el-option>
-          <el-option label="是" value="true"></el-option>
-          <el-option label="否" value="false"></el-option>
+          <el-option label="是" value="1"></el-option>
+          <el-option label="否" value="0"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="创建日期">
@@ -87,12 +87,12 @@
         sortable="custom"
       ></el-table-column>
       <el-table-column
-        prop="category"
+        prop="categoryName"
         label="分类"
         sortable="custom"
       ></el-table-column>
       <el-table-column
-        prop="author"
+        prop="authorName"
         label="作者"
         sortable="custom"
       ></el-table-column>
@@ -108,11 +108,11 @@
       </el-table-column>
 
       <el-table-column prop="thumbnail" label="缩略图">
-        <template #default="{row}">
-          <div  >
+        <template #default="{ row }">
+          <div>
             <el-image
-              :src="row.thumbnail"
-              :preview-src-list="[row.thumbnail]"
+              :src="row.thumbnail2"
+              :preview-src-list="[row.thumbnail2]"
               :fit="'contain'"
               style="width: 50px; height: 50px"
             ></el-image>
@@ -126,7 +126,7 @@
       ></el-table-column>
       <el-table-column prop="status" label="连载状态" sortable="custom">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.status === 'ongoing'">连载中</el-tag>
+          <el-tag v-if="scope.row.status == 1">连载中</el-tag>
           <el-tag v-else type="success">已完结</el-tag>
         </template>
       </el-table-column>
@@ -160,20 +160,22 @@
         label="购买人气"
         sortable="custom"
       ></el-table-column>
-      <el-table-column prop="banned" label="上架状态" sortable="custom">
+      <el-table-column prop="enable" label="上架状态" sortable="custom">
         <template slot-scope="scope">
-          <el-tag v-if="scope.row.banned" type="danger">是</el-tag>
-          <el-tag v-else>否</el-tag>
+          <el-tag v-if="scope.row.enable == 1" type="danger">已上架</el-tag>
+          <el-tag v-else>已下架</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type="text" @click="openMangaEditor(scope.row.id)">编辑</el-button
+          <el-button type="text" @click="openMangaEditor(scope.row.id)"
+            >编辑</el-button
           >
-          <el-button type="text" @click="deleteManga(scope.row)">删除</el-button
+          <el-button type="text" @click="deleteManga(scope.row)"
+            >删除</el-button
           >
           <el-button type="text" @click="toggleBan(scope.row)">{{
-            scope.row.banned ? "下架" : "上架"
+            scope.row.enable == 1 ? "下架" : "上架"
           }}</el-button>
         </template>
       </el-table-column>
@@ -212,161 +214,194 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { decryptImage } from '@/utils/AES'
+import { Component, Vue } from "vue-property-decorator";
+import { decryptImage } from "@/utils/AES";
 import {
   getComicList,
   getCategorys,
   toggleBan,
   deleteManga,
-  startScraping
-} from '@/api/comic'
+  startScraping,
+} from "@/api/comic";
 @Component
 export default class MangaManagement extends Vue {
   mangas: any[] = [];
   currentPage = 1;
   pageSize = 10;
   total = 0;
-  searchForm = {
+  searchForm: any = {
     // 在此处添加查询表单的其他字段
   };
 
   categories = [];
-  sort = {};
+  sort: any = {};
   imagePreviewDialogVisible = false;
-  previewImageUrl = '';
+  previewImageUrl = "";
   descriptionDialogVisible = false;
-  selectedDescription = '';
+  selectedDescription = "";
   listLoading = false;
   async mounted() {
-    this.searchMangas()
-    this.categories = await (await getCategorys({})).data
+    this.searchMangas();
+    this.categories = await (await getCategorys({})).data;
   }
 
   async searchMangas() {
-    this.listLoading = true
+    this.listLoading = true;
     const data = await getComicList({
-      search: this.searchForm,
-      currentPage: this.currentPage,
-      pageSize: this.pageSize,
-      sort: this.sort
-    })
-    this.mangas = []
-    this.mangas = data.data.list
+      data: {
+        name: this.searchForm.name,
+        category: this.searchForm.category,
+        status: this.searchForm.status,
+        enable: this.searchForm.enable,
+        startCreateDate: this.searchForm.createDate
+          ? this.searchForm.createDate[0]
+          : "",
+        endCreateDate: this.searchForm.createDate
+          ? this.searchForm.createDate[1]
+          : "",
+        startUpdateDate: this.searchForm.updateDate
+          ? this.searchForm.updateDate[0]
+          : "",
+        endUpdateDate: this.searchForm.updateDate
+          ? this.searchForm.updateDate[1]
+          : "",
+        sortBy: this.sort.prop,
+        sortDirection: this.sort.order === "ascending" ? "asc" : "desc",
+      },
+      page: this.currentPage,
+      size: this.pageSize,
+    });
+    this.mangas = [];
+    this.mangas = data.data.dataList;
     const decryptedIcons = await Promise.all(
-      this.mangas.map(async(comic) => {
-        return await decryptImage(comic.thumbnailUrl)
+      this.mangas.map(async (comic) => {
+        return await decryptImage(comic.thumbnailUrl);
       })
-    )
+    );
 
     this.mangas = this.mangas.map((comic, index) => {
-      comic.thumbnail = decryptedIcons[index]
-      return comic
-    })
+      comic.thumbnail2 = decryptedIcons[index];
+      return comic;
+    });
 
-    this.total = data.data.total
-    this.listLoading = false
+    this.total = data.data.total;
+    this.listLoading = false;
   }
 
   // 打开漫画编辑页面
   openMangaEditor(mangaId: string | null = null) {
     // 编辑模式
-    this.$router.push({ name: 'editor', params: { id: mangaId } })
+    this.$router.push({ name: "editor", params: { id: mangaId } });
   }
 
   // 开始抓取漫画
   async startScraping() {
-    this.$confirm('请不要频繁抓取', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(async() => {
-      const response: any = await startScraping({})
-      if (response.code === 20000) {
-        this.$message.success('已开始采集任务')
+    this.$confirm("请不要频繁抓取", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(async () => {
+      const response: any = await startScraping({});
+      if (response.code === 200) {
+        this.$message.success("已开始采集任务");
       } else {
-        this.$message.error(response.msg)
+        this.$message.error(response.msg);
       }
-    })
+    });
   }
 
   // 删除漫画
   async deleteManga(manga: any) {
-    this.$confirm('确定删除该漫画吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }).then(async() => {
-      const response: any = await deleteManga({ id: manga.id })
-      if (response.code === 20000) {
-        this.$message.success(manga.isBanned ? '已解封' : '已上架')
+    this.$confirm("确定删除该漫画吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(async () => {
+      const response: any = await deleteManga({ id: manga.id });
+      if (response.code === 200) {
+        this.$message.success("已删除");
 
-        this.searchMangas()
+        this.searchMangas();
       } else {
-        this.$message.error('操作失败，请稍后重试')
+        this.$message.error("操作失败，请稍后重试");
       }
-    })
+    });
   }
 
   // 切换漫画上架状态
   async toggleBan(manga: any) {
     this.$confirm(
-      '确定' + manga.isBanned ? '上架' : '下架' + '该漫画吗？',
-      '提示',
+      "确定" + (manga.enable == 0) ? "上架" : "下架" + "该漫画吗？",
+      "提示",
       {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
       }
-    ).then(async() => {
-      const response: any = await toggleBan({ id: manga.id })
-      if (response.code === 20000) {
-        this.$message.success(manga.isBanned ? '已下架' : '已上架')
-        this.searchMangas()
+    ).then(async () => {
+      const response: any = await toggleBan({ id: manga.id });
+      if (response.code === 200) {
+        this.$message.success(manga.enable == 1 ? "已下架" : "已上架");
+        this.searchMangas();
       } else {
-        this.$message.error('操作失败，请稍后重试')
+        this.$message.error("操作失败，请稍后重试");
       }
-    })
+    });
   }
 
   // 处理每页大小变化
   handleSizeChange(val: number) {
-    this.pageSize = val
-    this.searchMangas()
+    this.pageSize = val;
+    this.searchMangas();
   }
 
   // 处理当前页变化
   handleCurrentChange(val: number) {
-    this.currentPage = val
-    this.searchMangas()
+    this.currentPage = val;
+    this.searchMangas();
   }
 
   // 处理排序变化
-  async onSortChange({ prop, order }: { prop: string, order: string }) {
-    this.sort = { prop, order }
-    this.searchMangas()
+  async onSortChange({ prop, order }: { prop: string; order: string }) {
+    this.sort = { prop, order };
+    if (this.sort.prop === "categoryName") {
+      this.sort.prop = "category";
+    }
+    if (this.sort.prop === "authorName") {
+      this.sort.prop = "author_id";
+    }
+    if (this.sort.prop === "createDate") {
+      this.sort.prop = "create_date";
+    }
+    if (this.sort.prop === "updateDate") {
+      this.sort.prop = "update_date";
+    }
+    if (this.sort.prop === "freeUntil") {
+      this.sort.prop = "free_until"; 
+    }
+    this.searchMangas();
   }
 
   // 在 methods 中添加以下方法
   resetSearchConditions() {
     this.searchForm = {
-      name: '',
-      category: '',
-      author: '',
-      description: '',
-      thumbnail: '',
-      status: '',
-      isBanned: '',
-      createDateStart: '',
-      createDateEnd: '',
-      updateDateStart: '',
-      updateDateEnd: ''
-    }
+      name: "",
+      category: "",
+      author: "",
+      description: "",
+      thumbnail: "",
+      status: "",
+      isBanned: "",
+      createDateStart: "",
+      createDateEnd: "",
+      updateDateStart: "",
+      updateDateEnd: "",
+    };
   }
 
   showDescriptionDialog(row: { description: string }) {
-    this.selectedDescription = row.description
-    this.descriptionDialogVisible = true
+    this.selectedDescription = row.description;
+    this.descriptionDialogVisible = true;
   }
 }
 </script>

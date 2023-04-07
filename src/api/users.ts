@@ -38,8 +38,7 @@ export const login = (data: any) =>
     method: 'post',
     data: {
       data: data,
-      page: 1,
-      size: 0
+      
     }
   })
 

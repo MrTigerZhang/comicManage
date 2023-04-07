@@ -23,22 +23,22 @@
           <el-option
             v-for="(category, index) in categories"
             :key="index"
-            :label="category.label"
-            :value="category.value"
+            :label="category.name"
+            :value="category.id"
           ></el-option>
         </el-select>
       </el-form-item>
 
-      <el-form-item label="标签" prop="tags">
+      <el-form-item label="标签" prop="labels">
         <el-input
-          v-model="mangaForm.tagsString"
+          v-model="mangaForm.label"
           placeholder="请输入标签，用逗号分隔"
           @input="handleTagsInput"
         >
         </el-input>
         <div>
           <el-tag
-            v-for="(tag, index) in mangaForm.tags"
+            v-for="(tag, index) in mangaForm.labels"
             :key="index"
             closable
             @close="handleTagClose(index)"
@@ -48,8 +48,8 @@
         </div>
       </el-form-item>
 
-      <el-form-item label="作者" prop="author">
-        <el-select v-model="mangaForm.author" placeholder="请选择作者">
+      <el-form-item label="作者" prop="authorId">
+        <el-select v-model="mangaForm.authorId" placeholder="请选择作者">
           <el-option
             v-for="(author, index) in authors"
             :key="index"
@@ -82,7 +82,7 @@
         </div>
         <image-crop-upload
           ref="imageCropper"
-          url="/api/upload"
+          :url="uploadUrl"
           :headers="{
             'X-Access-Token': getToken(),
           }"
@@ -92,20 +92,22 @@
           :width="150"
           :height="300"
           v-model="showImageCropUpload"
-          :field="'icon'"
+          :field="'file'"
           @crop-upload-success="uploadSuccess"
           @crop-cancel="resetImageCropUpload"
         ></image-crop-upload>
       </el-form-item>
       <el-form-item label="连载状态" prop="status">
         <el-select v-model="mangaForm.status" placeholder="请选择">
-          <el-option label="连载中" value="1"></el-option>
-          <el-option label="已完结" value="2"></el-option>
+          <el-option label="连载中" :value="1"></el-option>
+          <el-option label="已完结" :value="2"></el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="上架状态">
         <el-switch
-          v-model="mangaForm.banned"
+          v-model="mangaForm.enable"
+          :active-value="1"
+          :inactive-value="0"
           active-text="是"
           inactive-text="否"
         ></el-switch>
@@ -129,6 +131,7 @@
     </el-dialog>
     <!-- 章节管理组件 -->
     <chapter-manager
+      v-if="isEditMode"
       :title="mangaForm.name"
       :comicId="comicId"
     ></chapter-manager>
@@ -154,20 +157,21 @@ import ChapterManager from "./cmps/ChapterManager.vue";
   },
 })
 export default class MangaEditor extends Vue {
+  uploadUrl = process.env.VUE_APP_BASE_API + "/api/upload";
   isEditMode = false;
   listLoading = false;
   mangaForm = {
     id: "",
     name: "",
     category: "",
-    author: "",
+    authorId: "",
     description: "",
     thumbnail: "",
     status: "",
     banned: false,
-    tags: [] as string[],
-    tagsString: "",
+    labels: [] as string[],
     thumbnailUrl: "",
+    label: "",
   };
 
   imagePreviewDialogVisible = false;
@@ -211,30 +215,34 @@ export default class MangaEditor extends Vue {
   };
 
   async created() {
-    const id:string = this.$route.params.id as string;
+    const id: string = this.$route.params.id as string;
 
     this.categories = await (await getCategorys({})).data;
     this.authors = (await getAuthors({})).data; // 获取作者列表
-    console.log(id);
     //不能使用  !==
-    if (id &&  "-1" != id) {
+    if (id && "-1" != id) {
       this.isEditMode = true;
       this.getComicDetails(id);
+      
     }
   }
 
   async getComicDetails(id: any) {
     this.listLoading = true;
-    const data = (await getComicDetail(id)).data;
+    const data = (await getComicDetail({ id: id })).data;
 
     this.mangaForm = data;
+    var tmp: string = this.mangaForm.thumbnail;
     this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl);
+    this.mangaForm.thumbnailUrl = tmp;
     this.listLoading = false;
+
+    this.handleTagsInput()
   }
 
   async uploadSuccess(response: any) {
-    this.mangaForm.thumbnailUrl = response.data;
-    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl);
+    this.mangaForm.thumbnailUrl = response.data.key;
+    this.mangaForm.thumbnail = await decryptImage(response.data.url);
   }
 
   resetImageCropUpload() {
@@ -244,10 +252,21 @@ export default class MangaEditor extends Vue {
   async submitForm() {
     (this.$refs.mangaForm as any).validate(async (valid: boolean) => {
       if (valid) {
-        const result = await addOrUpdateComic(this.mangaForm);
+        const result = await addOrUpdateComic({
+          id: this.mangaForm.id,
+          name: this.mangaForm.name,
+          category: this.mangaForm.category,
+          authorId: this.mangaForm.authorId,
+          description: this.mangaForm.description,
+          thumbnail: this.mangaForm.thumbnailUrl,
+          status: this.mangaForm.status,
+          banned: this.mangaForm.banned,
+          label: this.mangaForm.label,
+          enable: 0,
+        });
         if (result) {
-          this.$message.success("添加成功");
-          // 关闭当前页面并导航到目标页面（例如，返回到漫画列表页）
+          this.$message.success("提交成功");
+          //刷新页面
           this.$router.go(0);
           this.mangaForm.id = result.data.comicId;
           this.comicId = result.data.comicId;
@@ -260,15 +279,15 @@ export default class MangaEditor extends Vue {
   }
 
   handleTagsInput() {
-    this.mangaForm.tags = this.mangaForm.tagsString
+    this.mangaForm.labels = this.mangaForm.label
       .split(",")
-      .map((tag) => tag.trim())
-      .filter((tag) => tag.length > 0);
+      .map((item: string) => item.trim())
+      .filter((item: string) => item.length > 0);
   }
 
   handleTagClose(index: any) {
-    this.mangaForm.tags.splice(index, 1);
-    this.mangaForm.tagsString = this.mangaForm.tags.join(", ");
+    this.mangaForm.labels.splice(index, 1);
+    this.mangaForm.label = this.mangaForm.labels.join(", ");
   }
 
   get currentDescriptionLength(): number {

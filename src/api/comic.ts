@@ -2,119 +2,117 @@ import request from '@/utils/request'
 
 export const getComicList = (params: any) =>
   request({
-    url: '/comic/list',
+    url: '/sys/comic/list',
     method: 'post',
-    params
+    data: params
   })
 
 export const getCategorys = (params: any) =>
   request({
-    url: '/comic/getCategorys',
+    url: '/sys/comic/category/list',
     method: 'post',
-    params
+    data: params
   })
 
 export const getAuthors = (params: any) =>
   request({
-    url: '/comic/getAuthors',
+    url: '/sys/comic/author/list',
     method: 'post',
-    params
   })
 
 export const getComicDetail = (params: any) =>
   request({
-    url: '/comic/getComicDetail',
+    url: '/sys/comic/detail',
     method: 'post',
-    params
+    data: params
   })
 
 export const toggleBan = (params: any) =>
   request({
-    url: '/comic/toggleBan',
+    url: '/sys/comic/shelf',
     method: 'post',
-    params
+    data: params
   })
 
 export const deleteManga = (params: any) =>
   request({
-    url: '/comic/deleteManga',
+    url: '/sys/comic/delete',
     method: 'post',
-    params
+    data: params
   })
 
 export const startScraping = (params: any) =>
   request({
-    url: '/comic/startScraping',
+    url: '/sys/comic/collect',
     method: 'post',
-    params
   })
 
 export const addOrUpdateComic = (params: any) =>
   request({
-    url: '/comic/addOrUpdateComic',
+    url: '/sys/comic/addOrUpdate',
     method: 'post',
-    params
+    data: params
   })
 
 export const queryChapters = (params: any) =>
   request({
-    url: '/comic/queryChapters',
+    url: '/sys/chapter/list',
     method: 'post',
-    params
+    data: params
   })
 
 export const deleteChapter = (params: any) =>
   request({
-    url: '/comic/deleteChapter',
+    url: 'sys/chapter/delete',
     method: 'post',
-    params
+    data: params
   })
 
 export const toggleChapterStatus = (params: any) =>
   request({
-    url: '/comic/toggleChapterStatus',
+    url: '/sys/chapter/shelf',
     method: 'post',
-    params
+    data: params
   })
 
 export const getChapterById = (params: any) =>
   request({
-    url: '/comic/getChapterById',
+    url: '/sys/chapter/detail',
     method: 'post',
-    params
+    data: params
   })
 
 export const addOrUpdateChapter = (params: any) =>
   request({
-    url: '/comic/addOrUpdateChapter',
+    url: '/sys/chapter/addOrUpdate',
     method: 'post',
-    params
+    data: params
   })
 
 export const addContent = (params: any) =>
   request({
-    url: '/comic/addContent',
+    url: '/sys/images/add',
     method: 'post',
-    params
+    data:params
   })
 
 export const queryContentList = (params: any) =>
   request({
-    url: '/comic/queryContentList',
+    url: '/sys/images/list',
     method: 'post',
-    params
+    data: params
   })
 
 export const deleteContent = (params: any) =>
   request({
-    url: '/comic/deleteContent',
+    url: '/sys/images/delete',
     method: 'post',
-    params
+    data: params
   })
 
 export const updateContentSort = (params: any) =>
   request({
-    url: '/comic/updateContentSort',
+    url: '/sys/images/swap',
     method: 'post',
-    params
+    data: params
   })

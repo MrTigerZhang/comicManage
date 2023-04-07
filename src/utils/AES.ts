@@ -42,10 +42,10 @@ export async function decryptImage(imageUrl: string) {
     if (UserModule.systemConfig.imageEncryptionEnabled == 1) {
 
         //优先从localStorage中获取图像数据
-        const cached = localStorage.getItem(imageUrl)
-        if (cached) {
-            return cached;
-        }
+        // const cached = localStorage.getItem(imageUrl)
+        // if (cached) {
+        //     return cached;
+        // }
 
         const imageData = await getImageDataAsBase64(imageUrl)
         const decryptedImageData = decryptImageData(imageData)

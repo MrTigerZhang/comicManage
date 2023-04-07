@@ -4,13 +4,15 @@
     :id="id"
     :options="dropzoneOptions"
     :use-custom-slot="true"
+    paramName="file"
+    method="post"
     @vdropzone-removed-file="dropzoneRemovedFile"
     @vdropzone-success="dropzoneSuccess"
     @vdropzone-added-file="dropzoneAddedFile"
     @vdropzone-queue-complete="dropzoneQueueComplete"
   >
     <div class="dropzone-custom-content">
-      <h3 class="dropzone-custom-title" :style="{color: themeColor}">
+      <h3 class="dropzone-custom-title" :style="{ color: themeColor }">
         Drag and drop to upload content!
       </h3>
       <div class="subtitle">
@@ -21,16 +23,17 @@
 </template>
 
 <script lang="ts">
-import VueDropzone from 'vue2-dropzone'
-import 'vue2-dropzone/dist/vue2Dropzone.min.css'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { SettingsModule } from '@/store/modules/settings'
+import VueDropzone from "vue2-dropzone";
+import "vue2-dropzone/dist/vue2Dropzone.min.css";
+import { Component, Prop, Vue } from "vue-property-decorator";
+import { SettingsModule } from "@/store/modules/settings";
+import { UserModule } from "@/store/modules/user";
 
 @Component({
-  name: 'Dropzone',
+  name: "Dropzone",
   components: {
-    VueDropzone
-  }
+    VueDropzone,
+  },
 })
 export default class extends Vue {
   // You can add more Prop, see: https://www.dropzonejs.com/#configuration
@@ -42,14 +45,14 @@ export default class extends Vue {
   @Prop({ default: 50 }) private maxFilesize!: number; // In MB
 
   @Prop({ default: true }) private addRemoveLinks!: boolean;
-  @Prop({ default: 'Drop files here to upload' })
+  @Prop({ default: "Drop files here to upload" })
   private dictDefaultMessage!: string;
 
-  @Prop({ default: 'Your broswer does not support dropzone.js' })
+  @Prop({ default: "Your broswer does not support dropzone.js" })
   private dictFallbackMessage!: string;
 
-  @Prop({ default: 'Remove' }) private dictRemoveFile!: string;
-  @Prop({ default: 'Max Files Exceeded' })
+  @Prop({ default: "Remove" }) private dictRemoveFile!: string;
+  @Prop({ default: "Max Files Exceeded" })
   private dictMaxFilesExceeded!: string;
 
   get dropzoneOptions() {
@@ -65,34 +68,37 @@ export default class extends Vue {
       dictDefaultMessage: this.dictDefaultMessage,
       dictFallbackMessage: this.dictFallbackMessage,
       dictRemoveFile: this.dictRemoveFile,
-      dictMaxFilesExceeded: this.dictMaxFilesExceeded
-    }
+      dictMaxFilesExceeded: this.dictMaxFilesExceeded,
+      headers: {
+        "X-Access-Token": UserModule.token,
+      },
+    };
   }
 
   get themeColor() {
-    return SettingsModule.theme
+    return SettingsModule.theme;
   }
 
   // You can add more Event handler, see: https://rowanwins.github.io/vue-dropzone/docs/dist/#/events
   private dropzoneSuccess(file: File, response: any) {
-    this.$emit('dropzone-success', file, response);
-    (this.$refs.myDropzone as any).removeFile(file)
+    this.$emit("dropzone-success", file, response);
+    (this.$refs.myDropzone as any).removeFile(file);
   }
 
   private dropzoneRemovedFile(file: File, error: Error, xhr: XMLHttpRequest) {
-    this.$emit('dropzone-removed-file', file, error, xhr)
+    this.$emit("dropzone-removed-file", file, error, xhr);
   }
 
   private dropzoneAddedFile(file: File) {
     // Process the queue when a new file is added
 
-    (this.$refs.myDropzone as any).processQueue()
-    console.log(file.name)
+    (this.$refs.myDropzone as any).processQueue();
+    console.log(file.name);
   }
 
   private dropzoneQueueComplete() {
     // Handle the event when the queue is complete
-    console.log('All files have been processed')
+    console.log("All files have been processed");
   }
 }
 </script>

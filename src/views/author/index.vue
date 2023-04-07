@@ -27,7 +27,8 @@
         <el-button type="primary" @click="searchAuthors">查询</el-button>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="openDialog('add')">新增作者</el-button
+        <el-button type="primary" @click="openDialog('add')"
+          >新增作者</el-button
         >
       </el-form-item>
     </el-form>
@@ -40,7 +41,7 @@
       v-loading="listLoading"
     >
       <el-table-column prop="icon" label="头像ICON">
-        <template #default="{row}">
+        <template #default="{ row }">
           <div>
             <el-image
               :src="row.icon"
@@ -55,22 +56,23 @@
       <el-table-column prop="phone" label="手机号"></el-table-column>
       <el-table-column prop="email" label="邮箱"></el-table-column>
       <el-table-column prop="createDate" label="创建日期"></el-table-column>
-      <el-table-column prop="status" label="是否禁用" width="120">
-        <template #default="{row}">
+      <el-table-column prop="status" label="状态" width="120">
+        <template #default="{ row }">
           <el-switch
             v-model="row.status"
-            active-value="active"
-            inactive-value="inactive"
+            :active-value="1"
+            :inactive-value="0"
             @change="toggleAuthorStatus(row)"
           ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="160">
-        <template #default="{row}">
+        <template #default="{ row }">
           <el-button
             type="primary"
             size="mini"
-            @click="openDialog('edit', row)" >
+            @click="openDialog('edit', row)"
+          >
             编辑
           </el-button>
           <el-button type="danger" size="mini" @click="deleteAuthor(row)">
@@ -101,7 +103,7 @@
     >
       <el-form ref="form" :model="formData" :rules="rules" label-width="80px">
         <el-form-item label="头像" prop="icon">
-          <div>
+          <div @click="showImageCropUpload = !showImageCropUpload">
             <el-image
               v-if="formData.icon"
               :src="formData.icon"
@@ -112,11 +114,10 @@
             <span v-else class="el-icon-upload"></span>
           </div>
           <image-crop-upload
-            url="/api/upload"
+            :url="uploadUrl"
             :headers="{
-              'X-Access-Token': getToken()
+              'X-Access-Token': getToken(),
             }"
-          
             :width="300"
             :height="300"
             :outputFormat="'png'"
@@ -146,127 +147,129 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import VueImageCropUpload from 'vue-image-crop-upload'
-import { UserModule } from '@/store/modules/user'
-import { decryptImage } from '@/utils/AES'
+import { Component, Vue } from "vue-property-decorator";
+import VueImageCropUpload from "vue-image-crop-upload";
+import { UserModule } from "@/store/modules/user";
+import { decryptImage } from "@/utils/AES";
 import {
   getAuthors,
   addAuthor,
   updateAuthor,
   deleteAuthor,
-  toggleAuthorStatus
-} from '@/api/author'
+  toggleAuthorStatus,
+} from "@/api/author";
 
 @Component({
   components: {
-    'image-crop-upload': VueImageCropUpload
-  }
+    "image-crop-upload": VueImageCropUpload,
+  },
 })
 export default class AuthorManagement extends Vue {
   authors: any[] = [];
   currentPage = 1;
   pageSize = 10;
   total = 0;
+  uploadUrl = process.env.VUE_APP_BASE_API + "/api/upload";
   private listLoading = true;
 
   searchForm = {
-    name: '',
-    phone: '',
-    createDate: []
+    name: "",
+    phone: "",
+    createDate: [],
   };
 
   dialogVisible = false;
-  dialogTitle = '';
+  dialogTitle = "";
   formData: any = {};
-  rules = {
-    icon: [
-      {
-        validator: (rules: any, value: any, callback: any) => {
-          if (!this.formData.iconUrl) {
-            callback(new Error('头像是必填项'))
-          } else {
-            callback()
-          }
+  rules = {};
+  beforeMount() {
+    this.rules = {
+      icon: [
+        {
+          validator: (rules: any, value: any, callback: any) => {
+            if (!this.formData.icon) {
+              callback(new Error("头像是必填项"));
+            } else {
+              callback();
+            }
+          },
+          trigger: "change",
         },
-        trigger: 'change'
-      }
-    ],
-    name: [{ required: true, message: '作者名字是必填项', trigger: 'blur' }],
-    phone: [
-      { required: true, message: '手机号是必填项', trigger: 'blur' },
-      {
-        pattern: /^1[3-9]\d{9}$/,
-        message: '请输入有效的手机号',
-        trigger: 'blur'
-      }
-    ],
-    email: [
-      { required: true, message: '邮箱是必填项', trigger: 'blur' },
-      { type: 'email', message: '请输入有效的邮箱地址', trigger: 'blur' }
-    ]
-  };
-
+      ],
+      name: [{ required: true, message: "作者名字是必填项", trigger: "blur" }],
+      phone: [
+        { required: true, message: "手机号是必填项", trigger: "blur" },
+        {
+          pattern: /^1[3-9]\d{9}$/,
+          message: "请输入有效的手机号",
+          trigger: "blur",
+        },
+      ],
+      email: [
+        { required: true, message: "邮箱是必填项", trigger: "blur" },
+        { type: "email", message: "请输入有效的邮箱地址", trigger: "blur" },
+      ],
+    };
+  }
   showImageCropUpload = false;
 
   mounted() {
-    this.getAuthorsData()
+    this.getAuthorsData();
   }
 
   async getAuthorsData() {
-    await this.searchAuthors()
+    await this.searchAuthors();
   }
 
   async searchAuthors() {
     // Extract the start and end dates from the createDate array
-    const [startDate, endDate] = this.searchForm.createDate
+    const [startDate, endDate] = this.searchForm.createDate;
 
     // 实现查询方法
     // 实现数据请求方法
-    this.listLoading = true
-    const data = (
-      await getAuthors({
-        search: {
-          ...this.searchForm,
-          startDate, // Send the start date separately
-          endDate // Send the end date separately
-        },
-        currentPage: this.currentPage,
-        pageSize: this.pageSize
-      })
-    ).data
-    this.authors = []
-
-    this.authors = data.list
+    this.listLoading = true;
+    const data: any = await getAuthors({
+      data: {
+        name: this.searchForm.name,
+        phone: this.searchForm.phone,
+        startDate: startDate ? startDate : null,
+        endDate: endDate ? endDate : null,
+      },
+      page: this.currentPage,
+      size: this.pageSize,
+    });
+    this.authors = [];
+    this.authors = data.data.dataList;
     const decryptedIcons = await Promise.all(
-      this.authors.map(async(author) => {
-        return await decryptImage(author.iconUrl)
+      this.authors.map(async (author) => {
+        return await decryptImage(author.iconUrl);
       })
-    )
+    );
 
     this.authors = this.authors.map((author, index) => {
-      author.icon = decryptedIcons[index]
-      return author
-    })
+      author.iconUrl = author.icon;
+      author.icon = decryptedIcons[index];
+      return author;
+    });
 
-    this.total = data.total
-    this.listLoading = false
+    this.total = data.data.total;
+    this.listLoading = false;
   }
 
   handleSizeChange(val: number) {
-    this.pageSize = val
-    this.getAuthorsData()
+    this.pageSize = val;
+    this.getAuthorsData();
   }
 
   handleCurrentChange(val: number) {
-    this.currentPage = val
-    this.getAuthorsData()
+    this.currentPage = val;
+    this.getAuthorsData();
   }
 
   openDialog(type: string, author?: any) {
-    this.dialogTitle = type === 'add' ? '新增作者' : '编辑作者'
-    this.formData = author ? Object.assign({}, author) : {}
-    this.dialogVisible = true
+    this.dialogTitle = type === "add" ? "新增作者" : "编辑作者";
+    this.formData = author ? Object.assign({}, author) : {};
+    this.dialogVisible = true;
   }
 
   submitDialog() {
@@ -274,55 +277,74 @@ export default class AuthorManagement extends Vue {
     (this.$refs.form as any).validate((valid: boolean) => {
       if (valid) {
         const submitMethod =
-          this.dialogTitle === '新增作者' ? addAuthor : updateAuthor
-        submitMethod(this.formData).then(() => {
-          this.$message.success(`${this.dialogTitle}成功`)
-          this.dialogVisible = false
-          this.getAuthorsData()
-        })
+          this.dialogTitle === "新增作者" ? addAuthor : updateAuthor;
+        submitMethod({
+          id: this.formData.id,
+          name: this.formData.name,
+          phone: this.formData.phone,
+          email: this.formData.email,
+          icon: this.formData.iconUrl,
+        }).then(() => {
+          this.$message.success(`${this.dialogTitle}成功`);
+          this.dialogVisible = false;
+          this.getAuthorsData();
+        });
       }
-    })
+    });
   }
 
   resetDialog() {
-    (this.$refs.form as any).resetFields()
-    this.showImageCropUpload = false
+    (this.$refs.form as any).resetFields();
+    this.showImageCropUpload = false;
   }
 
   async uploadSuccess(response: any) {
-    this.formData.iconUrl = response.data.url
-    this.formData.icon = await decryptImage(response.data.url)
-    this.showImageCropUpload = false
+    this.formData.iconUrl = response.data.key;
+
+    this.formData.icon = await decryptImage(response.data.url);
+    this.showImageCropUpload = false;
+    // Manually trigger the 'change' event for the 'icon' field
+    (this.$refs.form as any).validateField("icon");
   }
 
   resetImageCropUpload() {
-    this.showImageCropUpload = false
+    this.showImageCropUpload = false;
   }
 
   deleteAuthor(author: any) {
     // 实现删除作者方法
-    this.$confirm('确定删除该作者吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+    this.$confirm("确定删除该作者吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
     }).then(() => {
       deleteAuthor(author).then(() => {
-        this.$message.success('删除成功')
-        this.getAuthorsData()
-      })
+        this.$message.success("删除成功");
+        this.getAuthorsData();
+      });
+    }).catch(() => {
+      this.$message.info("已取消删除");
+      this.getAuthorsData();
     })
   }
 
   toggleAuthorStatus(author: any) {
-    // 实现启用/禁用作者方法
-    toggleAuthorStatus(author).then(() => {
-      this.$message.success(author.status === 'active' ? '已启用' : '已禁用')
-      this.getAuthorsData()
-    })
+    //询问
+    this.$confirm("确定要修改该作者状态吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
+    }).then(() => {
+      // 实现启用/禁用作者方法
+      toggleAuthorStatus(author).then(() => {
+        this.$message.success(author.status === 1 ? "已启用" : "已禁用");
+        this.getAuthorsData();
+      });
+    });
   }
 
   getToken() {
-    return UserModule.token
+    return UserModule.token;
   }
 }
 </script>
