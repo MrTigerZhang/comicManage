@@ -1,31 +1,37 @@
 import request from '@/utils/request'
- 
+
 
 export const getRecommendList = (params: any) =>
-  request({
-    url: '/recommend/list',
-    method: 'post',
-    params
-  })
+    request({
+        url: '/sys/recommend/list',
+        method: 'post',
+        data: params
+    })
 
 export const deleteRecommend = (params: any) =>
     request({
-        url: '/recommend/delete',
+        url: '/sys/recommend/delete',
         method: 'post',
-        params
+        data: params
     })
 
-export const addRecommend = (params: any) =>    
+export const addRecommend = (params: any) =>
     request({
-        url: '/recommend/add',
+        url: '/sys/recommend/add',
         method: 'post',
-        params
+        data: params
     })
 
 export const editRecommend = (params: any) =>
     request({
-        url: '/recommend/editRecommend',
+        url: '/sys/recommend/update',
         method: 'post',
-        params
+        data: params
     })
 
+export const getRecommendSelectList = (params: any) =>
+    request({
+        url: '/sys/recommend/comicSelectList',
+        method: 'post',
+        data: params
+    })

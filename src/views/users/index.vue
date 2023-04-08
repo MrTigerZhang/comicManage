@@ -177,7 +177,7 @@ export default class UserList extends Vue {
 
   // 格式化余额数据
   private formatMoney(money: number): string {
-    return `￥${(money / 100).toFixed(2)}`;
+    return money+"";
   }
 
   // 格式化创建日期数据

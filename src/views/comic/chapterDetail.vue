@@ -41,12 +41,12 @@
 
       <el-form-item
         label="缩略图"
-        prop="thumbnailUrl"
+        :prop="thumbnailUrl"
         :rules="[
           { required: true, message: '请上传缩略图', trigger: 'change' },
         ]"
       >
-        <div v-if="chapterForm.thumbnailUrl">
+        <div v-if="chapterForm.thumbnailUrl2">
           <el-image
             :src="chapterForm.thumbnailUrl2"
             :preview-src-list="[chapterForm.thumbnailUrl2]"

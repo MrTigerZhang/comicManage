@@ -4,13 +4,12 @@
       <el-form-item label="链接" prop="link">
         <el-input v-model="formData.link" placeholder="请输入链接"></el-input>
       </el-form-item>
-      <el-form-item label="图片" prop="imgUrl">
+      <el-form-item label="图片" prop="imgIcon">
         <img
           v-if="formData.imgIcon"
           :src="formData.imgIcon"
           width="686"
           height="144"
-          @click="previewImg"
         />
         <div />
         <el-button
@@ -25,15 +24,16 @@
           v-model="showUpload"
           @crop-upload-success="handleSuccess"
           :headers="{
-            'X-Access-Token': getToken()
+            'X-Access-Token': getToken(),
           }"
-          url="/api/upload"
+          :field="'file'"
+          :url="uploadUrl"
           :accept="'image/png, image/jpeg, image/gif'"
           :img-format="'png'"
           :img-quality="1"
           :width="686"
           :height="144"
-          :icon="{type: 'md-camera', size: '28px', color: '#8c939d'}"
+          :icon="{ type: 'md-camera', size: '28px', color: '#8c939d' }"
           :canCrop="false"
           :crop-center="false"
           :max-file-size-in-bytes="5000000"
@@ -54,77 +54,88 @@
   </div>
 </template>
 <script>
-import { getIndexAd, setIndexAd } from '@/api/settings'
-import VueImageCropUpload from 'vue-image-crop-upload'
-import { MessageBox } from 'element-ui'
-import { UserModule } from '@/store/modules/user'
-import { decryptImage } from '@/utils/AES'
+import { getIndexAd, setIndexAd } from "@/api/settings";
+import VueImageCropUpload from "vue-image-crop-upload";
+import { MessageBox } from "element-ui";
+import { UserModule } from "@/store/modules/user";
+import { decryptImage } from "@/utils/AES";
 export default {
   data() {
     return {
+      uploadUrl: process.env.VUE_APP_BASE_API + "/api/upload",
       formData: {
-        link: '',
-        imgUrl: '',
-        isShow: false
+        link: "",
+        imgUrl: "",
+        isShow: false,
+        imgIcon: "",
       },
       loading: false,
       dialogVisible: false,
       rules: {
-        link: [{ required: true, message: '链接不能为空', trigger: 'blur' }],
-        imgUrl: [{ required: true, message: '请上传图片', trigger: 'change' }]
+        link: [{ required: true, message: "链接不能为空", trigger: "blur" }],
+        imgUrl: [{ required: true, message: "请上传图片", trigger: "change" }],
       },
-      showUpload: false
-    }
+      showUpload: false,
+    };
   },
   components: {
-    VueImageCropUpload
+    VueImageCropUpload,
   },
   async created() {
     //
-    this.loading = true
-    const ad = await (await getIndexAd()).data
-    this.formData.link = ad.link
-    // 加载解密
-    this.formData.imgUrl = ad.imgUrl
-    this.formData.imgIcon = await decryptImage(this.formData.imgUrl)
-    this.formData.isShow = ad.isShow === 1
-    this.loading = false
+    this.loading = true;
+    const ad = await (await getIndexAd()).data;
+    if (ad) {
+      this.formData.id = ad.id;
+      this.formData.link = ad.link;
+      // 加载解密
+      this.formData.imgUrl = ad.imgUrl;
+      this.formData.imgIcon = await decryptImage(ad.imgUrlFull);
+      this.formData.isShow = ad.isShow == 1;
+    }
+
+    this.loading = false;
   },
   methods: {
     async handleSubmit() {
       if (this.loading) {
-        return
+        return;
       }
-      this.loading = true
-      this.$refs.form.validate(async(valid) => {
+      this.loading = true;
+      this.$refs.form.validate(async (valid) => {
         if (valid) {
           // 提交表单
-          await setIndexAd(this.formData)
-          this.loading = false
-          MessageBox.alert('提交成功', '提示', {
-            confirmButtonText: '确定',
-            type: 'info'
-          })
+          await setIndexAd({
+            link: this.formData.link,
+            imgUrl: this.formData.imgUrl,
+            isShow: this.formData.isShow ? 1 : 0,
+            id: this.formData.id,
+          });
+          this.loading = false;
+          MessageBox.alert("提交成功", "提示", {
+            confirmButtonText: "确定",
+            type: "info",
+          });
         } else {
-          console.log('error submit!!')
-          this.loading = false
+          console.log("error submit!!");
+          this.loading = false;
         }
-      })
+      });
     },
     async handleSuccess(response) {
       // 上传后 解密
-      this.formData.imgUrl = response.data
-      this.formData.imgIcon = await decryptImage(this.formData.imgUrl)
+      this.formData.imgUrl = response.data.key;
+      this.formData.imgIcon = await decryptImage(response.data.url);
     },
     toggleShow() {
-      this.showUpload = !this.showUpload
+      this.showUpload = !this.showUpload;
     },
     previewImg() {
-      this.dialogVisible = true
+      this.dialogVisible = true;
     },
     getToken() {
-      return UserModule.token
-    }
-  }
-}
+      return UserModule.token;
+    },
+  },
+};
 </script>

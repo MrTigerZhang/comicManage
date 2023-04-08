@@ -2,14 +2,14 @@ import request from '@/utils/request'
 
 export const selectOrders = (params: any) =>
   request({
-    url: '/order/select',
+    url: '/sys/comicOrder/list',
     method: 'post',
-    params
+    data: params
   })
 
 export const manualPay = (params: any) =>
   request({
-    url: '/order/manualPay',
+    url: '/sys/comicOrder/pay',
     method: 'post',
-    params
+    data: params
   })

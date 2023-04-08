@@ -23,16 +23,20 @@
       </el-form>
     </div>
 
-    <el-table :data="messages" style="width: 100%"  @row-click="openMessageDialog"   >
+    <el-table
+      :data="messages"
+      style="width: 100%"
+      @row-click="openMessageDialog"
+    >
       <el-table-column prop="id" label="消息ID" width="180"></el-table-column>
       <el-table-column prop="title" label="消息标题">
-        <template #default="{row}">
-          <span  >{{ row.title }}</span>
-          <span v-if="row.status === '0'" class="red-dot"></span>
+        <template #default="{ row }">
+          <span>{{ row.title }}</span>
+          <span v-if="row.isRead == 0" class="red-dot"></span>
         </template>
       </el-table-column>
       <el-table-column
-        prop="date"
+        prop="msgDate"
         label="消息日期"
         width="180"
       ></el-table-column>
@@ -49,73 +53,76 @@
     ></el-pagination>
 
     <el-dialog :visible.sync="messageDialogVisible" title="消息内容">
-      <p>{{ currentMessage.msg }}</p>
+      <p>{{ currentMessage.content }}</p>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getMessages, setMessageRead } from '@/api/message'
+import { getMessages, setMessageRead } from "@/api/message";
 
 export default {
   data() {
     return {
       queryForm: {
-        dateRange: '',
-        status: ''
+        dateRange: "",
+        status: "",
       },
       messages: [],
       pageSize: 10,
       currentPage: 1,
       total: 0,
       messageDialogVisible: false,
-      currentMessage: {}
-    }
+      currentMessage: {},
+    };
   },
   mounted() {
-    this.queryMessages()
+    this.queryMessages();
   },
   methods: {
     async queryMessages() {
       try {
         const { data } = await getMessages({
-          dateRange: this.queryForm.dateRange,
-          status: this.queryForm.status,
-          pageSize: this.pageSize,
-          currentPage: this.currentPage
-        })
+          data: {
+            msgStatus: this.queryForm.status,
+            msgDateStart: this.queryForm.dateRange[0],
+            msgDateEnd: this.queryForm.dateRange[1],
+          },
+          page: this.currentPage,
+          size: this.pageSize,
+        });
 
-        this.messages = data.list
-        this.total = data.total
+        this.messages = data.dataList;
+        this.total = data.total;
       } catch (error) {
-        console.error('查询消息失败：', error)
+        console.error("查询消息失败：", error);
       }
     },
     handleSizeChange(newSize) {
-      this.pageSize = newSize
-      this.queryMessages()
+      this.pageSize = newSize;
+      this.queryMessages();
     },
     handleCurrentChange(newPage) {
-      this.currentPage = newPage
-      this.queryMessages()
+      this.currentPage = newPage;
+      this.queryMessages();
     },
     openMessageDialog(message) {
-      this.currentMessage = message
-      this.messageDialogVisible = true
-      this.setMessageRead(message)
+      this.currentMessage = message;
+      this.messageDialogVisible = true;
+      this.setMessageRead(message);
     },
     async setMessageRead(message) {
-      if (message.status === 'unread') {
+      if (message.isRead ==0) {
         try {
-          await setMessageRead(message.id)
-          message.status = 'read'
+          await setMessageRead({ id: message.id });
+          message.isRead = 1;
         } catch (error) {
-          console.error('更新消息状态失败：', error)
+          console.error("更新消息状态失败：", error);
         }
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>

@@ -2,15 +2,15 @@ import request from '@/utils/request'
 
 export const getIndexAd = (params: any) =>
   request({
-    url: '/settings/getIndexAd',
+    url: '/sys/homeAd/get',
     method: 'post'
   })
 
 export const setIndexAd = (data: any) =>
   request({
-    url: '/settings/setIndexAd',
+    url: '/sys/homeAd/addOrUpdate',
     method: 'post',
-    data
+    data: data
   })
 
 export const getSystemInfo = () =>

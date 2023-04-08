@@ -1,6 +1,14 @@
 <template>
   <!-- 创建一个用于管理推荐的模块  -->
+
   <div class="components-container">
+    <!-- 提示信息
+   -->
+    <aside>
+      <h3>推荐管理</h3>
+      <br />
+      不提供编辑方法，只提供删除方法
+    </aside>
     <!-- 顶部的搜索框 -->
     <el-form :inline="true" :model="searchForm" class="search-form">
       <el-form-item label="推荐名称">
@@ -26,35 +34,24 @@
     </el-form>
     <!-- 顶部的搜索框 -->
     <!-- 表格 -->
-    <el-table :data="recommendList" border stripe v-loaing="listLoading">
+    <el-table :data="recommendList" border :v-loaing="listLoading">
       <el-table-column label="推荐名称" prop="name"></el-table-column>
-        <el-table-column label="推荐类型" prop="type">
-            <template slot-scope="{ row }">
-                <el-tag v-if="row.type === 1">首页6</el-tag>
-                <el-tag v-else-if="row.type === 2">首页3</el-tag>
-                <el-tag v-else-if="row.type === 3">首页4</el-tag>
-            </template>
-        </el-table-column>
-      <el-table-column label="推荐内容">
+      <el-table-column label="推荐类型" prop="type">
         <template slot-scope="{ row }">
-          <el-tag
-            v-for="item in row.content"
-            :key="item.id"
-            closable
-            @close="deleteContent(row, item)"
-          >
-            {{ item.name }}
-          </el-tag>
+          <el-tag v-if="row.type == 1">首页6</el-tag>
+          <el-tag v-else-if="row.type == 2">首页3</el-tag>
+          <el-tag v-else-if="row.type == 3">首页4</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="推荐内容" prop="content"> </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="{ row }">
-          <el-button
+          <!-- <el-button
             size="mini"
             type="text"
             @click="showEditRecommendDialog(row)"
             >编辑</el-button
-          >
+          > -->
           <el-button size="mini" type="text" @click="deleteRecommend(row)"
             >删除</el-button
           >
@@ -86,9 +83,9 @@
         </el-form-item>
         <el-form-item label="推荐类型" prop="type">
           <el-radio-group v-model="addRecommendForm.type">
-            <el-radio label="1">首页6</el-radio>
-            <el-radio label="2">首页3</el-radio>
-            <el-radio label="3">首页4</el-radio>
+            <el-radio :label="1">首页6</el-radio>
+            <el-radio :label="2">首页3</el-radio>
+            <el-radio :label="3">首页4</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="推荐内容" prop="content">
@@ -98,9 +95,7 @@
             placeholder="请选择推荐内容"
           >
             <el-option
-              v-for="item in addRecommendForm.type === '1'
-                ? comicList
-                : novelList"
+              v-for="item in comicList"
               :key="item.id"
               :label="item.name"
               :value="item.id"
@@ -124,8 +119,8 @@ import {
   addRecommend,
   deleteRecommend,
   editRecommend,
+  getRecommendSelectList,
 } from "@/api/recommend";
-import { getComicList } from "@/api/comic";
 
 @Component({
   components: {},
@@ -154,8 +149,6 @@ export default class Recommend extends Vue {
   };
   // 漫画列表
   comicList: any[] = [];
-  // 小说列表
-  novelList: any[] = [];
 
   // 搜索
   search() {
@@ -166,8 +159,15 @@ export default class Recommend extends Vue {
   // 获取推荐列表
   getRecommendList() {
     this.listLoading = true;
-    getRecommendList(this.searchForm).then((res: any) => {
-      this.recommendList = res.data.list;
+    getRecommendList({
+      data: {
+        name: this.searchForm.name,
+        type: this.searchForm.type,
+      },
+      page: this.searchForm.page,
+      size: this.searchForm.limit,
+    }).then((res: any) => {
+      this.recommendList = res.data.dataList;
       this.total = res.data.total;
       this.listLoading = false;
     });
@@ -177,17 +177,8 @@ export default class Recommend extends Vue {
   getComicList() {
     this.listLoading = true;
 
-    getComicList({ page: 1, limit: 1000 }).then((res: any) => {
-      this.comicList = res.data.list;
-      this.listLoading = false;
-    });
-  }
-
-  // 小说列表
-  getNovelList() {
-    this.listLoading = true;
-    getComicList({ page: 1, limit: 1000 }).then((res: any) => {
-      this.novelList = res.data.list;
+    getRecommendSelectList({}).then((res: any) => {
+      this.comicList = res.data;
       this.listLoading = false;
     });
   }
@@ -196,7 +187,11 @@ export default class Recommend extends Vue {
   addRecommend() {
     (this.$refs.addRecommendFormRef as any).validate((valid: boolean) => {
       if (valid) {
-        addRecommend(this.addRecommendForm).then((res: any) => {
+        addRecommend({
+          name: this.addRecommendForm.name,
+          type: this.addRecommendForm.type,
+          content: this.addRecommendForm.content.join(","),
+        }).then((res: any) => {
           this.$message.success("添加成功");
           this.addRecommendDialogVisible = false;
           this.getRecommendList();
@@ -212,7 +207,7 @@ export default class Recommend extends Vue {
       cancelButtonText: "取消",
       type: "warning",
     }).then(() => {
-      deleteRecommend(row.id).then((res: any) => {
+      deleteRecommend({ id: row.id }).then((res: any) => {
         this.$message.success("删除成功");
         this.getRecommendList();
       });
@@ -222,10 +217,13 @@ export default class Recommend extends Vue {
   // 显示编辑推荐的对话框
   showEditRecommendDialog(row: any) {
     this.addRecommendDialogVisible = true;
+    if (!row) {
+      return;
+    }
     this.addRecommendForm = {
       name: row.name,
       type: row.type,
-      content: row.content.map((item: any) => item.id),
+      content: row.content,
     };
   }
 
@@ -233,7 +231,12 @@ export default class Recommend extends Vue {
   editRecommend() {
     (this.$refs.addRecommendFormRef as any).validate((valid: boolean) => {
       if (valid) {
-        editRecommend(this.addRecommendForm).then((res: any) => {
+        editRecommend({
+          id: this.$route.query.id,
+          name: this.addRecommendForm.name,
+          type: this.addRecommendForm.type,
+          content: this.addRecommendForm.content.join(","),
+        }).then((res: any) => {
           this.$message.success("编辑成功");
           this.addRecommendDialogVisible = false;
           this.getRecommendList();
@@ -255,7 +258,6 @@ export default class Recommend extends Vue {
   created() {
     this.getRecommendList();
     this.getComicList();
-    this.getNovelList();
   }
   resetSearchForm() {
     this.searchForm = {
@@ -264,13 +266,6 @@ export default class Recommend extends Vue {
       page: 1,
       limit: 10,
     };
-  }
-
-  //删除推荐内容项
-  deleteContentItem(index: number) {
-    this.addRecommendForm.content.splice(index, 1);
-    //提交表单
-    this.addRecommend();
   }
 }
 </script>
