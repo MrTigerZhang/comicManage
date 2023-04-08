@@ -2,6 +2,11 @@
 <template>
   <!-- 这段代码非常的混乱 请不要学习 -->
   <div class="components-container">
+    <aside>
+      本系统分类均为一级分类，分类下有若干漫画，漫画下有若干章节，漫画和章节的关系是一对多的关系，分类和漫画的关系是一对多的关。
+
+    </aside>
+
     <!-- 添加分类按钮 -->
     <el-button type="primary" @click="openDialog('add')">添加分类</el-button>
     <div style="height: 10px"></div>

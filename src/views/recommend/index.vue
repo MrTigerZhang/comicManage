@@ -77,6 +77,7 @@
         :model="addRecommendForm"
         ref="addRecommendFormRef"
         label-width="80px"
+        :rules="rules"
       >
         <el-form-item label="推荐名称" prop="name">
           <el-input v-model="addRecommendForm.name"></el-input>
@@ -126,6 +127,13 @@ import {
   components: {},
 })
 export default class Recommend extends Vue {
+  // 表单验证规则
+  rules = {
+    name: [{ required: true, message: "请输入推荐名称", trigger: "blur" }],
+    type: [{ required: true, message: "请选择推荐类型", trigger: "blur" }],
+    content: [{ required: true, message: "请选择推荐内容", trigger: "blur" }],
+  };
+
   // 表格加载状态
   listLoading = false;
   // 搜索表单

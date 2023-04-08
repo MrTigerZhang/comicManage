@@ -1,5 +1,9 @@
 <template>
   <div class="components-container">
+    <aside>
+      漫画用户是指在本站注册的用户 ，可以在本站阅读漫画。余额通过充值完成。
+      亦可通过其他方式获取
+    </aside>
     <!-- 查询条件 -->
     <div class="search-container">
       <el-form :inline="true" :model="queryForm" class="demo-form-inline">
@@ -177,7 +181,7 @@ export default class UserList extends Vue {
 
   // 格式化余额数据
   private formatMoney(money: number): string {
-    return money+"";
+    return money + "";
   }
 
   // 格式化创建日期数据

@@ -1,5 +1,10 @@
 <template>
   <div class="components-container">
+    <aside>
+      作者与漫画是一对多的关系。每个漫画只能有一个作者。
+      </br>
+      多人协作的漫画，可以创建一个新的作者署名，例如作者名叫：张三与李四
+    </aside>
     <!-- 查询表单 -->
     <el-form
       ref="searchForm"
@@ -317,15 +322,17 @@ export default class AuthorManagement extends Vue {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",
-    }).then(() => {
-      deleteAuthor(author).then(() => {
-        this.$message.success("删除成功");
+    })
+      .then(() => {
+        deleteAuthor(author).then(() => {
+          this.$message.success("删除成功");
+          this.getAuthorsData();
+        });
+      })
+      .catch(() => {
+        this.$message.info("已取消删除");
         this.getAuthorsData();
       });
-    }).catch(() => {
-      this.$message.info("已取消删除");
-      this.getAuthorsData();
-    })
   }
 
   toggleAuthorStatus(author: any) {
