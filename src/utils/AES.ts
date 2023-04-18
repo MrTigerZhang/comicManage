@@ -50,7 +50,7 @@ export async function decryptImage(imageUrl: string) {
         const imageData = await getImageDataAsBase64(imageUrl)
         const decryptedImageData = decryptImageData(imageData)
         //将解密后的图像数据缓存到localStorage中 设置缓存时间为1天
-       // localStorage.setItem(imageUrl, decryptedImageData)
+        // localStorage.setItem(imageUrl, decryptedImageData)
         return decryptedImageData
     } else {
         return imageUrl;

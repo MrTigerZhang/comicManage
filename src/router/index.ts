@@ -111,6 +111,33 @@ export const constantRoutes: RouteConfig[] = [
         }
       }
     ]
+  },{
+    //帮助管理
+    path: '/help',
+    component: Layout,
+    redirect: '/help/index',
+    children: [
+      {
+        path: 'help',
+        component: () => import(/* webpackChunkName: "dashboard" */ '@/views/help/index.vue'),
+        name: 'help',
+        meta: {
+          title: 'help',
+          icon: 'guide',
+          affix: true
+        }
+      },
+      { // 帮助新增和编辑/详情页面
+        path: 'editor/:id(\\d+)',
+        component: () => import('@/views/help/helpDetail.vue'),
+        name: 'editor',
+        meta: {
+          title: 'helpDetail',
+          noCache: true,
+          hidden: true
+        }
+      }
+    ]
   },
   { //   漫画管理¬
     path: '/comic',

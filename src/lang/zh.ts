@@ -75,6 +75,10 @@ export default {
     editorChapter: '漫画章节详情',
     msg: '消息列表',
     recommend: '推荐管理',
+    recommendList: '推荐列表',
+    help: '帮助中心',
+    helpList: '帮助列表',
+    helpDetail: '帮助详情',
   },
   navbar: {
     logOut: '退出登录',
