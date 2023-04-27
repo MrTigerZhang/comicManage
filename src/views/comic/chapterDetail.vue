@@ -4,6 +4,8 @@
       当前修改的漫画： {{ comicTitle }}
       <br />
       章节修改后自动更新为下架状态，需要手动重新上架
+      </br>
+      章节序号自动生成，不需要手动填写
     </aside>
     <h3>{{ isEditMode ? "编辑章节" : "新增章节" }}</h3>
     <el-form
@@ -33,15 +35,16 @@
         <div>{{ nameLength }} / 15</div>
       </el-form-item>
       <el-form-item label="章节序号" prop="chapterNo">
-        <el-input-number
+        <el-input
           v-model="chapterForm.chapterNo"
           :min="1"
-        ></el-input-number>
+          readonly="readonly"
+        ></el-input>
       </el-form-item>
 
       <el-form-item
         label="缩略图"
-        :prop="thumbnailUrl"
+        prop="thumbnail"
         :rules="[
           { required: true, message: '请上传缩略图', trigger: 'change' },
         ]"
@@ -50,7 +53,7 @@
           <el-image
             :src="chapterForm.thumbnailUrl2"
             :preview-src-list="[chapterForm.thumbnailUrl2]"
-            style="width: 150px; height: 150px"
+            style="width: 272px; height: 160px"
           ></el-image>
         </div>
 
@@ -60,7 +63,9 @@
       </el-form-item>
 
       <el-form-item label="价格">
-        <el-input-number v-model="chapterForm.price" :min="0"></el-input-number>
+        <el-input-number v-model="chapterForm.price" :min="0"
+    controls-position="right" readonly = "readonly"
+    ></el-input-number>
       </el-form-item>
 
       <el-form-item>
@@ -82,8 +87,8 @@
       :field="'file'"
       v-model="showCropDialog"
       :output-format="'jpeg'"
-      :width="150"
-      :height="300"
+      :width="272"
+      :height="160"
       @crop-upload-success="cropUploadSuccess"
       @crop-upload-fail="cropUploadFail"
     ></vue-image-crop-upload>
@@ -93,7 +98,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import VueImageCropUpload from "vue-image-crop-upload";
-import { getChapterById, addOrUpdateChapter } from "@/api/comic";
+import { getChapterById, addOrUpdateChapter,getMaxChapterNo } from "@/api/comic";
 import ImageList from "./cmps/ImageList.vue";
 import { decryptImage } from "@/utils/AES";
 import { UserModule } from "@/store/modules/user";
@@ -108,7 +113,7 @@ export default class EditChapter extends Vue {
 
   chapterForm = {
     name: "",
-    thumbnail: "",
+    thumbnail: null,
     thumbnailUrl: "",
     thumbnailUrl2: "",
     pageCount: 1,
@@ -153,6 +158,7 @@ export default class EditChapter extends Vue {
       this.listLoading = false;
       this.updateNameLength();
     } else {
+      this.chapterForm.chapterNo = (await  getMaxChapterNo({id: this.comicId})).data;
       this.listLoading = false;
     }
   }
@@ -162,7 +168,7 @@ export default class EditChapter extends Vue {
   }
 
   async saveChapter() {
-    this.$confirm("章节修改后自动更新为下架状态，需要手动重新上架", "提示", {
+    this.$confirm("确定更新吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",

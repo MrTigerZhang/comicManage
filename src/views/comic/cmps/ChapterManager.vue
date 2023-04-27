@@ -66,9 +66,11 @@
       </el-form>
       <!-- 分页列表 -->
       <el-table
+        ref="formTable"
         :data="chapters"
         @sort-change="handleSortChange"
         border
+        row-key="id"
         stripe
         v-loading="listLoading"
       >
@@ -113,6 +115,11 @@
             <el-tag v-else type="danger">已下架</el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="拖拽" width="80">
+          <template #default>
+            <i class="el-icon-rank handle"></i>
+          </template>
+        </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="{ row }">
             <el-button size="mini" type="text" @click="deleteChapter(row)"
@@ -150,8 +157,15 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { queryChapters, deleteChapter, toggleChapterStatus } from "@/api/comic";
+import {
+  queryChapters,
+  deleteChapter,
+  toggleChapterStatus,
+  updateChapterOrder
+} from "@/api/comic";
 import { decryptImage } from "@/utils/AES";
+import Sortable from "sortablejs";
+
 interface Chapter {
   id: number;
   name: string;
@@ -183,6 +197,7 @@ interface SearchForm {
 
 @Component
 export default class ChapterManager extends Vue {
+  private sortable: Sortable | null = null;
   chapters: Chapter[] = [];
   searchForm: SearchForm = {};
   @Prop({ required: true }) title!: string;
@@ -193,7 +208,10 @@ export default class ChapterManager extends Vue {
   pageSize = 10;
   listLoading = false;
   async created() {
-    this.searchChapters();
+    await this.searchChapters();
+    this.$nextTick(() => {
+      this.setSort();
+    });
   }
 
   async searchChapters() {
@@ -220,15 +238,15 @@ export default class ChapterManager extends Vue {
             status: this.searchForm.status,
             sortBy: this.searchForm.sortBy,
             sortDirection:
-              this.searchForm.sortOrder === "ascending" ? "asc" : "desc",
+              this.searchForm.sortOrder === "ascending" ? "asc" : "desc"
           },
           page: this.currentPage,
-          size: this.pageSize,
+          size: this.pageSize
         })
       ).data;
       this.chapters = dataList;
       const decryptedIcons = await Promise.all(
-        this.chapters.map(async (chapter) => {
+        this.chapters.map(async chapter => {
           return await decryptImage(chapter.thumbnailUrl);
         })
       );
@@ -269,7 +287,7 @@ export default class ChapterManager extends Vue {
     this.$confirm("确定删除该章节吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       await deleteChapter({ id: row.id });
       this.$message.success("删除成功");
@@ -282,7 +300,7 @@ export default class ChapterManager extends Vue {
     this.$confirm("确定" + action + "该章节吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       await toggleChapterStatus({ id: row.id });
       this.$message.success(action + "成功");
@@ -298,8 +316,33 @@ export default class ChapterManager extends Vue {
       params: {
         chapterId: id,
         comicId: this.comicId + "",
-        comicTitle: this.title,
-      },
+        comicTitle: this.title
+      }
+    });
+  }
+
+  private setSort() {
+    const el = (this.$refs.formTable as Vue).$el.querySelectorAll(
+      ".el-table__body-wrapper > table > tbody"
+    )[0] as HTMLElement;
+    console.log(el);
+    this.sortable = Sortable.create(el, {
+      ghostClass: "sortable-ghost2", // Class name for the drop placeholder
+      handle: ".handle", // 拖拽手柄的选择器
+      onEnd: async evt => {
+        if (
+          typeof evt.oldIndex !== "undefined" &&
+          typeof evt.newIndex !== "undefined"
+        ) {
+          // 您可以在这里处理拖拽结束时的操作，例如更新数据的顺序
+          console.log("From:", evt.oldIndex, "To:", evt.newIndex);
+          const oldId = this.chapters[evt.oldIndex].id;
+          const newId = this.chapters[evt.newIndex].id;
+          this.listLoading = true;
+          await updateChapterOrder({ oldId: oldId, newId: newId });
+          this.searchChapters();
+        }
+      }
     });
   }
 }
@@ -308,5 +351,35 @@ export default class ChapterManager extends Vue {
 <style scoped>
 .chapter-manager {
   margin-top: 20px;
+}
+</style>
+
+<style lang="scss" scoped>
+/* 在这里编写你的样式 */
+.handle {
+  cursor: move;
+}
+.sortable-ghost2 {
+  opacity: 0.8;
+  color: #fff !important;
+  background: #e66604 !important;
+}
+
+.icon-star {
+  margin-right: 2px;
+}
+
+.draggable-handler {
+  cursor: pointer;
+}
+
+.show-d {
+  margin-top: 15px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
 }
 </style>

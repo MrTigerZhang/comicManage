@@ -93,7 +93,7 @@ export const addContent = (params: any) =>
   request({
     url: '/sys/images/add',
     method: 'post',
-    data:params
+    data: params
   })
 
 export const queryContentList = (params: any) =>
@@ -113,6 +113,21 @@ export const deleteContent = (params: any) =>
 export const updateContentSort = (params: any) =>
   request({
     url: '/sys/images/swap',
+    method: 'post',
+    data: params
+  })
+
+
+export const getMaxChapterNo = (params: any) =>
+  request({
+    url: '/sys/chapter/maxNo',
+    method: 'post',
+    data: params
+  })
+
+export const updateChapterOrder = (params: any) =>
+  request({
+    url: '/sys/chapter/swap',
     method: 'post',
     data: params
   })
