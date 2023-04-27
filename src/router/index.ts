@@ -128,9 +128,9 @@ export const constantRoutes: RouteConfig[] = [
         }
       },
       { // 帮助新增和编辑/详情页面
-        path: 'editor/:id(\\d+)',
+        path: 'helpeditor/:id(\\d+)',
         component: () => import('@/views/help/helpDetail.vue'),
-        name: 'editor',
+        name: 'helpDetail',
         meta: {
           title: 'helpDetail',
           noCache: true,

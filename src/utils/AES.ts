@@ -41,16 +41,11 @@ export async function decryptImage(imageUrl: string) {
     // 如果系统配置了加密，则对图像进行解密
     if (UserModule.systemConfig.imageEncryptionEnabled == 1) {
 
-        //优先从localStorage中获取图像数据
-        // const cached = localStorage.getItem(imageUrl)
-        // if (cached) {
-        //     return cached;
-        // }
+
 
         const imageData = await getImageDataAsBase64(imageUrl)
         const decryptedImageData = decryptImageData(imageData)
-        //将解密后的图像数据缓存到localStorage中 设置缓存时间为1天
-        // localStorage.setItem(imageUrl, decryptedImageData)
+
         return decryptedImageData
     } else {
         return imageUrl;

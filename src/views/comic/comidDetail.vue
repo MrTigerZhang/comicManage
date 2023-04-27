@@ -6,6 +6,7 @@
     <aside>
       新增漫画后 ，刷新页面可以编辑章节内容哦
       <br />
+      竖图 ：630X840 横图 : 750X436
     </aside>
     <el-form
       ref="mangaForm"
@@ -62,7 +63,8 @@
         <el-input type="textarea" v-model="mangaForm.description"></el-input>
         <div class="word-count">{{ currentDescriptionLength }} / 256</div>
       </el-form-item>
-      <el-form-item label="缩略图" prop="thumbnail">
+      <!-- 竖图 -->
+      <el-form-item label="竖图" prop="thumbnail">
         <div v-if="!mangaForm.thumbnail">
           <el-button type="primary" @click="showImageCropUpload = true"
             >上传图片</el-button
@@ -84,34 +86,63 @@
           ref="imageCropper"
           :url="uploadUrl"
           :headers="{
-            'X-Access-Token': getToken(),
+            'X-Access-Token': getToken()
           }"
           :outputFormat="'png'"
           :scaleRatio="1"
           :autoCrop="false"
-          :width="150"
-          :height="300"
+          :width="630"
+          :height="840"
           v-model="showImageCropUpload"
           :field="'file'"
           @crop-upload-success="uploadSuccess"
           @crop-cancel="resetImageCropUpload"
         ></image-crop-upload>
       </el-form-item>
+      <!-- 横图 -->
+      <el-form-item label="横图" prop="thumbnail2">
+        <div v-if="!mangaForm.thumbnail2">
+          <el-button type="primary" @click="showImageCropUpload = true"
+            >上传图片</el-button
+          >
+        </div>
+        <div v-else>
+          <el-image
+            :src="mangaForm.thumbnail2"
+            :preview-src-list="[mangaForm.thumbnail2]"
+            :fit="'contain'"
+            style="width: 100px; height: 100px"
+          ></el-image>
+
+          <el-button type="text" @click="showImageCropUpload = true"
+            >修改图片</el-button
+          >
+        </div>
+        <image-crop-upload
+          ref="imageCropper"
+          :url="uploadUrl"
+          :headers="{
+            'X-Access-Token': getToken()
+          }"
+          :outputFormat="'png'"
+          :scaleRatio="1"
+          :autoCrop="false"
+          :width="750"
+          :height="436"
+          v-model="showImageCropUpload"
+          :field="'file'"
+          @crop-upload-success="uploadSuccess2"
+          @crop-cancel="resetImageCropUpload"
+        ></image-crop-upload>
+      </el-form-item>
+
       <el-form-item label="连载状态" prop="status">
         <el-select v-model="mangaForm.status" placeholder="请选择">
           <el-option label="连载中" :value="1"></el-option>
           <el-option label="已完结" :value="2"></el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="上架状态">
-        <el-switch
-          v-model="mangaForm.enable"
-          :active-value="1"
-          :inactive-value="0"
-          active-text="是"
-          inactive-text="否"
-        ></el-switch>
-      </el-form-item>
+
       <el-form-item>
         <el-button type="primary" @click="submitForm">提交</el-button>
       </el-form-item>
@@ -147,14 +178,14 @@ import {
   getCategorys,
   getAuthors,
   getComicDetail,
-  addOrUpdateComic,
+  addOrUpdateComic
 } from "@/api/comic";
 import ChapterManager from "./cmps/ChapterManager.vue";
 @Component({
   components: {
     "image-crop-upload": VueImageCropUpload,
-    "chapter-manager": ChapterManager, // 章节管理组件
-  },
+    "chapter-manager": ChapterManager // 章节管理组件
+  }
 })
 export default class MangaEditor extends Vue {
   uploadUrl = process.env.VUE_APP_BASE_API + "/api/upload";
@@ -171,7 +202,9 @@ export default class MangaEditor extends Vue {
     banned: false,
     labels: [] as string[],
     thumbnailUrl: "",
-    label: "",
+    thumbnail2: "",
+    thumbnailUrl2: "",
+    label: ""
   };
 
   imagePreviewDialogVisible = false;
@@ -188,14 +221,14 @@ export default class MangaEditor extends Vue {
         min: 3,
         max: 64,
         message: "漫画名称长度必须在 3 到 64 之间",
-        trigger: "blur",
-      },
+        trigger: "blur"
+      }
     ],
     category: [
-      { required: true, message: "漫画分类是必填项", trigger: "change" },
+      { required: true, message: "漫画分类是必填项", trigger: "change" }
     ],
     author: [
-      { required: true, message: "漫画作者是必填项", trigger: "change" },
+      { required: true, message: "漫画作者是必填项", trigger: "change" }
     ],
     description: [
       { required: true, message: "漫画简介是必填项", trigger: "change" },
@@ -203,15 +236,14 @@ export default class MangaEditor extends Vue {
         min: 30,
         max: 256,
         message: "漫画简介长度必须在 30 到 256 之间",
-        trigger: "blur",
-      },
+        trigger: "blur"
+      }
     ],
     status: [
-      { required: true, message: "连载状态是必填项", trigger: "change" },
+      { required: true, message: "连载状态是必填项", trigger: "change" }
     ],
-    thumbnail: [
-      { required: true, message: "缩略图不能为空", trigger: "change" },
-    ],
+    thumbnail: [{ required: true, message: "竖图不能为空", trigger: "change" }],
+    thumbnail2: [{ required: true, message: "横图不能为空", trigger: "change" }]
   };
 
   async created() {
@@ -223,7 +255,6 @@ export default class MangaEditor extends Vue {
     if (id && "-1" != id) {
       this.isEditMode = true;
       this.getComicDetails(id);
-      
     }
   }
 
@@ -232,17 +263,43 @@ export default class MangaEditor extends Vue {
     const data = (await getComicDetail({ id: id })).data;
 
     this.mangaForm = data;
+    // 由于后端返回的是加密的图片，所以需要解密
     var tmp: string = this.mangaForm.thumbnail;
-    this.mangaForm.thumbnail = await decryptImage(this.mangaForm.thumbnailUrl);
-    this.mangaForm.thumbnailUrl = tmp;
+    if (
+      this.mangaForm.thumbnailUrl &&
+      this.mangaForm.thumbnailUrl.indexOf("null") == -1
+    ) {
+      this.mangaForm.thumbnail = await decryptImage(
+        this.mangaForm.thumbnailUrl
+      );
+      this.mangaForm.thumbnailUrl = tmp;
+    }
+
+    // 由于后端返回的是加密的图片，所以需要解密
+    var tmp2: string = this.mangaForm.thumbnail2;
+    if (
+      this.mangaForm.thumbnailUrl2 &&
+      this.mangaForm.thumbnailUrl2.indexOf("null") == -1
+    ) {
+      this.mangaForm.thumbnail2 = await decryptImage(
+        this.mangaForm.thumbnailUrl2
+      );
+      this.mangaForm.thumbnailUrl2 = tmp2;
+    }
+
     this.listLoading = false;
 
-    this.handleTagsInput()
+    this.handleTagsInput();
   }
 
   async uploadSuccess(response: any) {
     this.mangaForm.thumbnailUrl = response.data.key;
     this.mangaForm.thumbnail = await decryptImage(response.data.url);
+  }
+
+  async uploadSuccess2(response: any) {
+    this.mangaForm.thumbnailUrl2 = response.data.key;
+    this.mangaForm.thumbnail2 = await decryptImage(response.data.url);
   }
 
   resetImageCropUpload() {
@@ -259,10 +316,11 @@ export default class MangaEditor extends Vue {
           authorId: this.mangaForm.authorId,
           description: this.mangaForm.description,
           thumbnail: this.mangaForm.thumbnailUrl,
+          thumbnail2: this.mangaForm.thumbnailUrl2,
           status: this.mangaForm.status,
           banned: this.mangaForm.banned,
           label: this.mangaForm.label,
-          enable: 0,
+          enable: 0
         });
         if (result) {
           this.$message.success("提交成功");

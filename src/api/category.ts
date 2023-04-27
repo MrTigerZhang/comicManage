@@ -39,3 +39,10 @@ export const toggleStatus = (params: any) =>
     method: 'post',
     data:params
   })
+
+
+export const clearCache = () =>
+  request({
+    url: '/category/clearCache',
+    method: 'post',
+  })

@@ -1,14 +1,13 @@
- 
 <template>
   <!-- 这段代码非常的混乱 请不要学习 -->
   <div class="components-container">
     <aside>
       本系统分类均为一级分类，分类下有若干漫画，漫画下有若干章节，漫画和章节的关系是一对多的关系，分类和漫画的关系是一对多的关。
-
     </aside>
 
     <!-- 添加分类按钮 -->
     <el-button type="primary" @click="openDialog('add')">添加分类</el-button>
+    <el-button type="warn" @click="clearCache()">清空缓存</el-button>
     <div style="height: 10px"></div>
     <!-- 分类列表表格 -->
 
@@ -93,9 +92,9 @@
           <image-crop-upload
             :url="uploadUrl"
             :headers="{
-              'X-Access-Token': getToken(),
+              'X-Access-Token': getToken()
             }"
-            :width="350"
+            :width="340"
             :height="200"
             :outputFormat="'png'"
             :scaleRatio="1"
@@ -125,7 +124,7 @@ import {
   updateCategory,
   deleteCategory,
   updateSort,
-  toggleStatus,
+  toggleStatus,clearCache
 } from "@/api/category";
 import { Message } from "element-ui";
 import Sortable from "sortablejs";
@@ -133,8 +132,8 @@ import { decryptImage } from "@/utils/AES";
 @Component({
   components: {
     // 在这里注册你需要使用的组件
-    "image-crop-upload": VueImageCropUpload,
-  },
+    "image-crop-upload": VueImageCropUpload
+  }
 })
 export default class ComicCategory extends Vue {
   comicCategories: ComicCategoryData[] = [];
@@ -151,11 +150,11 @@ export default class ComicCategory extends Vue {
   rules = {
     name: [{ required: true, message: "分类名称是必填项", trigger: "blur" }],
     description: [
-      { required: true, message: "分类详情是必填项", trigger: "blur" },
+      { required: true, message: "分类详情是必填项", trigger: "blur" }
     ],
     code: [
       { required: true, message: "分类序号是必填项", trigger: "blur" },
-      { type: "number", message: "分类序号必须为数值", trigger: "blur" },
+      { type: "number", message: "分类序号必须为数值", trigger: "blur" }
     ],
     icon: [
       {
@@ -166,9 +165,9 @@ export default class ComicCategory extends Vue {
             callback();
           }
         },
-        trigger: "change",
-      },
-    ],
+        trigger: "change"
+      }
+    ]
   };
 
   async mounted() {
@@ -263,7 +262,7 @@ export default class ComicCategory extends Vue {
     this.$confirm("确定删除该分类吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       // 在这里实现删除分类的逻辑
       this.submitting = true;
@@ -304,7 +303,7 @@ export default class ComicCategory extends Vue {
         name: this.formData.name,
         description: this.formData.description,
         code: this.formData.code,
-        icon: this.formData.iconUrl,
+        icon: this.formData.iconUrl
       });
 
       this.resetNewCategory();
@@ -329,7 +328,7 @@ export default class ComicCategory extends Vue {
         name: this.formData.name,
         description: this.formData.description,
         code: this.formData.code,
-        icon: this.formData.iconUrl,
+        icon: this.formData.iconUrl
       });
 
       this.resetNewCategory();
@@ -353,7 +352,7 @@ export default class ComicCategory extends Vue {
       {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning",
+        type: "warning"
       }
     )
       .then(async () => {
@@ -369,6 +368,11 @@ export default class ComicCategory extends Vue {
       });
   }
 
+  async clearCache() {
+    await clearCache();
+    this.$message.success("清除缓存成功");
+  }
+
   getToken() {
     return UserModule.token;
   }
@@ -379,7 +383,7 @@ export default class ComicCategory extends Vue {
     )[0] as HTMLElement;
     this.sortable = Sortable.create(el, {
       ghostClass: "sortable-ghost", // Class name for the drop placeholder
-      onEnd: async (evt) => {
+      onEnd: async evt => {
         if (
           typeof evt.oldIndex !== "undefined" &&
           typeof evt.newIndex !== "undefined"
@@ -397,7 +401,7 @@ export default class ComicCategory extends Vue {
           await this.searchCategories();
           this.submitting = false;
         }
-      },
+      }
     });
   }
 }
