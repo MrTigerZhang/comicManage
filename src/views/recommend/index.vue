@@ -1,277 +1,234 @@
 <template>
-  <!-- 创建一个用于管理推荐的模块  -->
-
   <div class="components-container">
-    <!-- 提示信息
-   -->
     <aside>
-      <h3>推荐管理</h3>
+      推荐模块-推荐内容-推荐的漫画<br />
+      大家都在搜这种，选择无图模式，
       <br />
-      不提供编辑方法，只提供删除方法。按照与前端页面的对应关系，每个推荐选择相应的漫画和数量即可。
-      <br />
-      首页banner — 特殊   type = banner4  <br />
-      超热门推荐！ 6 type = hot6   <br />
-       精品-好康打滚推荐！4 type = hot4  <br />
-      好康，真的非常好康！ 4 type = nice4  <br />
-       近期热门推荐 6 type = recent6  <br />
-      [大家都在搜] 搜索的推荐内容 —- 特殊4 type = search4   <br />
-      大家都在搜 搜索内容为空时的推荐 4 type = search42
+      可以通过拖拽更改图片的顺序
+      
+      </br>
+      
+      首页banner — 特殊   type = banner </br>
+      超热门推荐！ 6 type = hot6 </br>
+      精品-好康打滚推荐！4 type = hot4</br>
+      好康，真的非常好康！ 4 type = nice4</br>
+      近期热门推荐 6 type = recent6</br>
+      [大家都在搜] 搜索的推荐内容 —- 特殊4 type = search4 </br>
+      大家都在搜 搜索内容为空时的推荐 4 type = search42</br>
     </aside>
-    <!-- 顶部的搜索框 -->
-    <el-form :inline="true" :model="searchForm" class="search-form">
-      <el-form-item label="推荐名称">
+    <el-row>
+      <el-col :span="6">
         <el-input
-          v-model="searchForm.name"
-          placeholder="请输入推荐名称"
+          v-model="searchParams.name"
+          placeholder="推荐名称"
+          @keyup.enter.native="search"
         ></el-input>
-      </el-form-item>
-      <!-- 清空查询条件 -->
-      <el-form-item>
-        <el-button type="primary" @click="resetSearchForm">清空</el-button>
-      </el-form-item>
-      <!-- 搜索按钮 -->
-      <el-form-item>
-        <el-button type="primary" @click="search">搜索</el-button>
-      </el-form-item>
-      <!-- 新增按钮 -->
-      <el-form-item>
-        <el-button type="primary" @click="showEditRecommendDialog"
-          >新增</el-button
+      </el-col>
+      <el-col :span="2">
+        <el-button type="primary" icon="el-icon-search" @click="search"
+          >查询</el-button
         >
-      </el-form-item>
-    </el-form>
-    <!-- 顶部的搜索框 -->
-    <!-- 表格 -->
-    <el-table :data="recommendList" border :v-loaing="listLoading">
-      <el-table-column label="推荐名称" prop="name"></el-table-column>
-      <el-table-column label="推荐类型" prop="type"></el-table-column>
-      <el-table-column label="推荐内容" prop="content"> </el-table-column>
-      <el-table-column label="操作">
-        <template slot-scope="{ row }">
-          <!-- <el-button
+      </el-col>
+      <el-col :span="3">
+        <el-button type="primary" icon="el-icon-plus" @click="showAddDialog"
+          >添加</el-button
+        >
+      </el-col>
+      <el-col :span="4">
+        <el-button type="danger" icon="el-icon-refresh" @click="refreshCache"
+          >刷新缓存</el-button
+        >
+      </el-col>
+      <el-col :span="4">
+        <el-button type="primary" icon="el-icon-check" @click="validateData"
+          >校验数据</el-button
+        >
+      </el-col>
+    </el-row>
+
+    <el-table :data="recommendationModules" border v-loading="loading">
+      <el-table-column prop="name" label="推荐名称"></el-table-column>
+      <el-table-column prop="type" label="类型" width="180"></el-table-column>
+      <el-table-column
+        prop="imgCount"
+        label="图片数量"
+        width="180"
+      ></el-table-column>
+      <el-table-column label="启用状态" width="180">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.enable"
+            :active-value="1"
+            :inactive-value="0"
+            @change="toggleStatus(scope.row)"
+          ></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="200">
+        <template slot-scope="scope">
+          <el-button
             size="mini"
-            type="text"
-            @click="showEditRecommendDialog(row)"
+            type="primary"
+            icon="el-icon-edit"
+            @click="showRecommendationEditDialog(scope.row)"
             >编辑</el-button
-          > -->
-          <el-button size="mini" type="text" @click="deleteRecommend(row)"
+          >
+          <el-button
+            size="mini"
+            type="danger"
+            icon="el-icon-delete"
+            @click="deleteRecommendation(scope.row)"
             >删除</el-button
           >
         </template>
       </el-table-column>
     </el-table>
-    <!-- 表格 -->
-    <!-- 分页 -->
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="searchForm.page"
-      :page-sizes="[10, 20, 30, 40]"
-      :page-size="searchForm.limit"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-    >
-    </el-pagination>
-    <!-- 分页 -->
-    <!-- 添加推荐的对话框 -->
-    <el-dialog title="添加推荐" :visible.sync="addRecommendDialogVisible">
-      <el-form
-        :model="addRecommendForm"
-        ref="addRecommendFormRef"
-        label-width="80px"
-        :rules="rules"
-      >
-        <el-form-item label="推荐名称" prop="name">
-          <el-input v-model="addRecommendForm.name"></el-input>
-        </el-form-item>
-        <el-form-item label="推荐类型" prop="type">
-          <el-input v-model="addRecommendForm.type"></el-input>
-        </el-form-item>
-        <el-form-item label="推荐内容" prop="content">
-          <el-select
-            v-model="addRecommendForm.content"
-            multiple
-            placeholder="请选择推荐内容"
-          >
-            <el-option
-              v-for="item in comicList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            >
-            </el-option>
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="addRecommendDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addRecommend">确 定</el-button>
-      </span>
-    </el-dialog>
+
+    <add-or-edit-recommendation-dialog
+      ref="addOrEditRecommendationDialog"
+      @refreshData="search"
+    ></add-or-edit-recommendation-dialog>
+
+    <recommendation-edit-dialog
+      ref="recommendationEditDialog"
+    ></recommendation-edit-dialog>
   </div>
 </template>
 
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import {
-  getRecommendList,
-  addRecommend,
-  deleteRecommend,
-  editRecommend,
-  getRecommendSelectList
-} from "@/api/recommend";
+<script>
+import AddOrEditRecommendationDialog from "./AddOrEditRecommendationDialog.vue";
 
-@Component({
-  components: {}
-})
-export default class Recommend extends Vue {
-  // 表单验证规则
-  rules = {
-    name: [{ required: true, message: "请输入推荐名称", trigger: "blur" }],
-    type: [{ required: true, message: "请选择推荐类型", trigger: "blur" }],
-    content: [{ required: true, message: "请选择推荐内容", trigger: "blur" }]
-  };
+import { list, clearCache, check, del, enable } from "@/api/recommendations";
+import RecommendationEditDialog from "./RecommendationEditDialog.vue";
 
-  // 表格加载状态
-  listLoading = false;
-  // 搜索表单
-  searchForm = {
-    name: "",
-    type: "",
-    page: 1,
-    limit: 10
-  };
-  // 推荐列表
-  recommendList: any[] = [];
-  // 总条数
-  total = 0;
-  // 添加推荐的对话框
-  addRecommendDialogVisible = false;
-  // 添加推荐的表单
-  addRecommendForm = {
-    name: "",
-    type: "1",
-    content: []
-  };
-  // 漫画列表
-  comicList: any[] = [];
-
-  // 搜索
-  search() {
-    this.searchForm.page = 1;
-    this.getRecommendList();
-  }
-
-  // 获取推荐列表
-  getRecommendList() {
-    this.listLoading = true;
-    getRecommendList({
-      data: {
-        name: this.searchForm.name,
-        type: this.searchForm.type
+export default {
+  components: {
+    AddOrEditRecommendationDialog,
+    RecommendationEditDialog // 引入推荐编辑组件
+  },
+  data() {
+    return {
+      searchParams: {
+        name: ""
       },
-      page: this.searchForm.page,
-      size: this.searchForm.limit
-    }).then((res: any) => {
-      this.recommendList = res.data.dataList;
-      this.total = res.data.total;
-      this.listLoading = false;
-    });
-  }
-
-  // 漫画列表
-  getComicList() {
-    this.listLoading = true;
-
-    getRecommendSelectList({}).then((res: any) => {
-      this.comicList = res.data;
-      this.listLoading = false;
-    });
-  }
-
-  // 添加推荐
-  addRecommend() {
-    (this.$refs.addRecommendFormRef as any).validate((valid: boolean) => {
-      if (valid) {
-        addRecommend({
-          name: this.addRecommendForm.name,
-          type: this.addRecommendForm.type,
-          content: this.addRecommendForm.content.join(",")
-        }).then((res: any) => {
-          this.$message.success("添加成功");
-          this.addRecommendDialogVisible = false;
-          this.getRecommendList();
-        });
-      }
-    });
-  }
-
-  // 删除推荐
-  deleteRecommend(row: any) {
-    this.$confirm("此操作将永久删除该推荐, 是否继续?", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning"
-    }).then(() => {
-      deleteRecommend({ id: row.id }).then((res: any) => {
-        this.$message.success("删除成功");
-        this.getRecommendList();
-      });
-    });
-  }
-
-  // 显示编辑推荐的对话框
-  showEditRecommendDialog(row: any) {
-    this.addRecommendDialogVisible = true;
-    if (!row) {
-      return;
-    }
-    this.addRecommendForm = {
-      name: row.name,
-      type: row.type,
-      content: row.content
+      recommendationModules: [],
+      loading: false
     };
-  }
-
-  // 编辑推荐
-  editRecommend() {
-    (this.$refs.addRecommendFormRef as any).validate((valid: boolean) => {
-      if (valid) {
-        editRecommend({
-          id: this.$route.query.id,
-          name: this.addRecommendForm.name,
-          type: this.addRecommendForm.type,
-          content: this.addRecommendForm.content.join(",")
-        }).then((res: any) => {
-          this.$message.success("编辑成功");
-          this.addRecommendDialogVisible = false;
-          this.getRecommendList();
-        });
-      }
-    });
-  }
-
-  handleSizeChange(val: number) {
-    this.searchForm.limit = val;
-    this.getRecommendList();
-  }
-
-  handleCurrentChange(val: number) {
-    this.searchForm.page = val;
-    this.getRecommendList();
-  }
-
+  },
   created() {
-    this.getRecommendList();
-    this.getComicList();
+    this.search();
+  },
+  methods: {
+    async search() {
+      this.loading = true;
+      const { data } = await list({
+        data: this.searchParams,
+        page: 1,
+        size: 1000
+      });
+      this.recommendationModules = data.dataList;
+      this.loading = false;
+    },
+    showAddDialog() {
+      this.$refs.addOrEditRecommendationDialog.showAddDialog();
+    },
+    showEditDialog(row) {
+      this.loading = true;
+      this.$refs.addOrEditRecommendationDialog.showEditDialog(row);
+    },
+    showRecommendationEditDialog(row) {
+      this.$refs.recommendationEditDialog.openDialog(row);
+    },
+    deleteRecommendation(row) {
+      this.$confirm("此操作将永久删除该推荐模块, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
+          await del({ id: row.id });
+          this.$message({
+            type: "success",
+            message: "删除成功!"
+          });
+          this.search();
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
+    toggleStatus(row) {
+      this.$confirm("此操作将切换推荐模块的启用状态, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
+          await enable({ id: row.id });
+          this.$message({
+            type: "success",
+            message: "切换成功!"
+          });
+          this.search();
+        })
+        .catch(() => {
+          this.search();
+        });
+    },
+    refreshCache() {
+      //clearCache
+      // 调用 API 刷新缓存
+      this.$confirm("此操作将刷新推荐模块的缓存, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
+          await clearCache();
+          this.$message({
+            type: "success",
+            message: "刷新成功!"
+          });
+          this.search();
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消刷新"
+          });
+        });
+    },
+    validateData() {
+      // 调用 API 校验数据
+      this.$confirm("此操作将校验推荐模块的数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
+          await check();
+          this.$message({
+            type: "success",
+            message: "校验成功!"
+          });
+          this.search();
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消校验"
+          });
+        });
+    }
   }
-  resetSearchForm() {
-    this.searchForm = {
-      name: "",
-      type: "",
-      page: 1,
-      limit: 10
-    };
-  }
-}
+};
 </script>
+
+<style scoped>
+.el-row {
+  margin-bottom: 20px;
+}
+</style>
