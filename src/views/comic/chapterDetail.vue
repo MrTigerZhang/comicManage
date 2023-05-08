@@ -82,8 +82,8 @@
       :field="'file'"
       v-model="showCropDialog"
       :output-format="'jpeg'"
-      :width="150"
-      :height="300"
+      :width="272"
+      :height="160"
       @crop-upload-success="cropUploadSuccess"
       @crop-upload-fail="cropUploadFail"
     ></vue-image-crop-upload>
@@ -210,6 +210,10 @@ export default class EditChapter extends Vue {
 
   //上传成功后，将返回的图片地址赋值给chapterForm.thumbnailUrl
   async cropUploadSuccess(response: any) {
+    if(response.code !== 200) {
+      this.$message.error("上传失败，请稍后重试");
+      return;
+    }
     this.chapterForm.thumbnailUrl2 = await decryptImage(response.data.url);
     this.chapterForm.thumbnail = response.data.key;
   }

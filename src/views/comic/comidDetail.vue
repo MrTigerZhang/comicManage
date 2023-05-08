@@ -66,7 +66,7 @@
       <!-- 竖图 -->
       <el-form-item label="竖图" prop="thumbnail">
         <div v-if="!mangaForm.thumbnail">
-          <el-button type="primary" @click="showImageCropUpload = true"
+          <el-button type="primary" @click="showImageCropUpload1 = true"
             >上传图片</el-button
           >
         </div>
@@ -78,7 +78,7 @@
             style="width: 100px; height: 100px"
           ></el-image>
 
-          <el-button type="text" @click="showImageCropUpload = true"
+          <el-button type="text" @click="showImageCropUpload1 = true"
             >修改图片</el-button
           >
         </div>
@@ -93,7 +93,7 @@
           :autoCrop="false"
           :width="630"
           :height="840"
-          v-model="showImageCropUpload"
+          v-model="showImageCropUpload1"
           :field="'file'"
           @crop-upload-success="uploadSuccess"
           @crop-cancel="resetImageCropUpload"
@@ -102,7 +102,7 @@
       <!-- 横图 -->
       <el-form-item label="横图" prop="thumbnail2">
         <div v-if="!mangaForm.thumbnail2">
-          <el-button type="primary" @click="showImageCropUpload = true"
+          <el-button type="primary" @click="showImageCropUpload2 = true"
             >上传图片</el-button
           >
         </div>
@@ -114,7 +114,7 @@
             style="width: 100px; height: 100px"
           ></el-image>
 
-          <el-button type="text" @click="showImageCropUpload = true"
+          <el-button type="text" @click="showImageCropUpload2 = true"
             >修改图片</el-button
           >
         </div>
@@ -128,8 +128,8 @@
           :scaleRatio="1"
           :autoCrop="false"
           :width="750"
-          :height="436"
-          v-model="showImageCropUpload"
+          :height="432"
+          v-model="showImageCropUpload2"
           :field="'file'"
           @crop-upload-success="uploadSuccess2"
           @crop-cancel="resetImageCropUpload"
@@ -139,7 +139,7 @@
       <!-- 方图 -->
       <el-form-item label="方图" prop="thumbnail3">
         <div v-if="!mangaForm.thumbnail3">
-          <el-button type="primary" @click="showImageCropUpload = true"
+          <el-button type="primary" @click="showImageCropUpload3 = true"
             >上传图片</el-button
           >
         </div>
@@ -151,7 +151,7 @@
             style="width: 100px; height: 100px"
           ></el-image>
 
-          <el-button type="text" @click="showImageCropUpload = true"
+          <el-button type="text" @click="showImageCropUpload3 = true"
             >修改图片</el-button
           >
         </div>
@@ -166,7 +166,7 @@
           :autoCrop="false"
           :width="532"
           :height="532"
-          v-model="showImageCropUpload"
+          v-model="showImageCropUpload3"
           :field="'file'"
           @crop-upload-success="uploadSuccess3"
           @crop-cancel="resetImageCropUpload"
@@ -247,7 +247,10 @@ export default class MangaEditor extends Vue {
   };
 
   imagePreviewDialogVisible = false;
-  showImageCropUpload = false;
+  showImageCropUpload1 = false;
+  showImageCropUpload2 = false;
+  showImageCropUpload3 = false;
+
   previewImageUrl = "";
   comicId = this.$route.params.id ? parseInt(this.$route.params.id) : -1;
   categories = [];
@@ -282,10 +285,10 @@ export default class MangaEditor extends Vue {
       { required: true, message: "连载状态是必填项", trigger: "change" }
     ],
     thumbnail: [{ required: true, message: "竖图不能为空", trigger: "change" }],
-    thumbnail2: [{ required: true, message: "横图不能为空", trigger: "change" }]  ,
+    thumbnail2: [
+      { required: true, message: "横图不能为空", trigger: "change" }
+    ],
     thumbnail3: [{ required: true, message: "方图不能为空", trigger: "change" }]
-
-
   };
 
   async created() {
@@ -347,22 +350,40 @@ export default class MangaEditor extends Vue {
   }
 
   async uploadSuccess(response: any) {
+     console.log(response);
+    if (response.code != 200) {
+      this.$message.error("上传失败");
+      console.log("上传失败");
+      return;
+    }
     this.mangaForm.thumbnailUrl = response.data.key;
     this.mangaForm.thumbnail = await decryptImage(response.data.url);
   }
 
   async uploadSuccess2(response: any) {
+    console.log(response);
+    if (response.code != 200) {
+      this.$message.error("上传失败");
+      return;
+    }
     this.mangaForm.thumbnailUrl2 = response.data.key;
     this.mangaForm.thumbnail2 = await decryptImage(response.data.url);
   }
 
   async uploadSuccess3(response: any) {
+     console.log(response);
+   if (response.code != 200) {
+      this.$message.error("上传失败");
+      return;
+    }
     this.mangaForm.thumbnailUrl3 = response.data.key;
     this.mangaForm.thumbnail3 = await decryptImage(response.data.url);
   }
 
   resetImageCropUpload() {
-    this.showImageCropUpload = false;
+    this.showImageCropUpload1 = false;
+    this.showImageCropUpload2 = false;
+    this.showImageCropUpload3 = false;
   }
 
   async submitForm() {
