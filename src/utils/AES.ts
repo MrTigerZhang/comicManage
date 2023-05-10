@@ -38,6 +38,10 @@ export function decryptImageData(data: string): string {
 
 // 加载并解密图像
 export async function decryptImage(imageUrl: string) {
+
+    if (!imageUrl) {
+        return null
+    }
     // 如果系统配置了加密，则对图像进行解密
     if (UserModule.systemConfig.imageEncryptionEnabled == 1) {
 
