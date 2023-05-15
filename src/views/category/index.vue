@@ -3,8 +3,13 @@
   <div class="components-container">
     <aside>
       本系统分类均为一级分类，分类下有若干漫画，漫画下有若干章节，漫画和章节的关系是一对多的关系，分类和漫画的关系是一对多的关。
+
       </br>
       尺寸为340*200
+      </br>
+      更新后数据设置为为未启用状态，需要手动启用。
+      </br>
+      清空缓存后，才可以立即看到效果
     </aside>
 
     <!-- 添加分类按钮 -->
@@ -23,9 +28,10 @@
       highlight-current-row
     >
       <el-table-column prop="id" label="分类ID"></el-table-column>
-      <el-table-column prop="name" label="分类名称"></el-table-column>
-      <el-table-column prop="description" label="分类详情"></el-table-column>
       <el-table-column prop="code" label="分类序号"></el-table-column>
+      <el-table-column prop="name" label="分类名称"></el-table-column>
+      <el-table-column prop="description" label="分类描述"></el-table-column>
+ 
       <el-table-column prop="icon" label="分类图标" width="100">
         <template #default="{ row }">
           <el-image
@@ -77,9 +83,7 @@
         <el-form-item label="分类详情" prop="description">
           <el-input v-model="formData.description"></el-input>
         </el-form-item>
-        <el-form-item label="分类序号" prop="code">
-          <el-input v-model.number="formData.code"></el-input>
-        </el-form-item>
+        
         <el-form-item label="分类图标" prop="icon">
           <div @click="showImageCropUpload = !showImageCropUpload">
             <el-image
@@ -329,7 +333,7 @@ export default class ComicCategory extends Vue {
         id: this.formData.id,
         name: this.formData.name,
         description: this.formData.description,
-        code: this.formData.code,
+        
         icon: this.formData.iconUrl
       });
 
