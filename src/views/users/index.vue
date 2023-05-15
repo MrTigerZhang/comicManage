@@ -39,7 +39,14 @@
             value-format="yyyy-MM-dd"
           ></el-date-picker>
         </el-form-item>
-
+  <!-- 用户状态 -->
+        <el-form-item label="用户状态">
+          <el-select v-model="queryForm.status" placeholder="请选择">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="启用" value="1"></el-option>
+            <el-option label="禁用" value="0"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleQuery">查询</el-button>
         </el-form-item>
@@ -58,26 +65,26 @@
       >
         <el-table-column prop="nickname" label="用户昵称"></el-table-column>
         <el-table-column prop="phone" label="手机号"></el-table-column>
-        <el-table-column prop="balance" label="余额" sortable>
-          <template slot-scope="{ row }">{{
+        <el-table-column prop="balance" label="剩余点数" sortable>
+          <template slot-scope="{row}">{{
             formatMoney(row.balance)
-          }}</template>
+          }}(点) </template>
         </el-table-column>
         <el-table-column prop="createDate" label="创建日期" sortable>
-          <template slot-scope="{ row }">{{
+          <template slot-scope="{row}">{{
             formatDate(row.createDate)
           }}</template>
         </el-table-column>
         <!-- 最后登陆日期 lastLoginDate -->
         <el-table-column prop="lastLoginDate" label="最后登陆日期" sortable>
-          <template slot-scope="{ row }">{{
+          <template slot-scope="{row}">{{
             formatDate(row.lastLoginDate)
           }}</template>
         </el-table-column>
 
         <!-- 未登陆天数 -->
         <el-table-column prop="lastLoginDate" label="未登陆天数" sortable>
-          <template slot-scope="{ row }">{{
+          <template slot-scope="{row}">{{
             formatLastLoginDate(row.lastLoginDate)
           }}</template>
         </el-table-column>
@@ -86,7 +93,7 @@
         </el-table-column>
 
         <el-table-column label="操作">
-          <template slot-scope="{ row }">
+          <template slot-scope="{row}">
             <el-button
               class="item-btn"
               size="small"
@@ -113,26 +120,28 @@
   </div>
 </template>
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { getUserList, enableUser } from "@/api/user";
-import { User } from "@/api/types";
+import { Component, Vue } from 'vue-property-decorator'
+import { getUserList, enableUser } from '@/api/user'
+import { User } from '@/api/types'
 
 @Component({
-  name: "UserList",
+  name: 'UserList'
 })
 export default class UserList extends Vue {
   private listLoading = true;
   // 查询条件
   private queryForm: {
-    phone: string | null;
-    createDateRange: string[] | null;
-    lastLoginDateRange: string[] | null;
-    sort: any | null;
+    phone: string | null
+    createDateRange: string[] | null
+    lastLoginDateRange: string[] | null
+    sort: any | null
+    status: string | null
   } = {
     phone: null,
     createDateRange: null,
     sort: undefined,
     lastLoginDateRange: null,
+    status: null
   };
 
   // 用户列表数据
@@ -142,62 +151,62 @@ export default class UserList extends Vue {
   private total = 0;
   private currentPage = 1;
   private pageSize = 10;
-  //排序相关数据
-  sortby = "";
-  sortdirection = "";
+  // 排序相关数据
+  sortby = '';
+  sortdirection = '';
 
   // 日期选择器选项
   private pickerOptions = {
     shortcuts: [
       {
-        text: "最近一周",
+        text: '最近一周',
         onClick(picker: any) {
-          const end = new Date();
-          const start = new Date();
-          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-          picker.$emit("pick", [start, end]);
-        },
+          const end = new Date()
+          const start = new Date()
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+          picker.$emit('pick', [start, end])
+        }
       },
       {
-        text: "最近一个月",
+        text: '最近一个月',
         onClick(picker: any) {
-          const end = new Date();
-          const start = new Date();
-          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-          picker.$emit("pick", [start, end]);
-        },
+          const end = new Date()
+          const start = new Date()
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+          picker.$emit('pick', [start, end])
+        }
       },
       {
-        text: "最近三个月",
+        text: '最近三个月',
         onClick(picker: any) {
-          const end = new Date();
-          const start = new Date();
-          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-          picker.$emit("pick", [start, end]);
-        },
-      },
-    ],
+          const end = new Date()
+          const start = new Date()
+          start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+          picker.$emit('pick', [start, end])
+        }
+      }
+    ]
   };
 
   // 格式化余额数据
   private formatMoney(money: number): string {
-    return money + "";
+    return money + ''
   }
 
   // 格式化创建日期数据
   private formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString("zh-CN");
+    return new Date(date).toLocaleDateString('zh-CN')
   }
 
   // 格式化状态数据
   private formatStatus(row: any): string {
-    return row.status === 0 ? "禁用" : "启用";
+    return row.status === 0 ? '禁用' : '启用'
   }
 
   // 查询用户列表
   private async getUserList() {
-    this.listLoading = true;
-    this.userList = [];
+    this.listLoading = true
+    this.userList = []
     const { data } = await getUserList({
       page: this.currentPage,
       size: this.pageSize,
@@ -217,86 +226,87 @@ export default class UserList extends Vue {
         lastLoginDateEnd: this.queryForm.lastLoginDateRange
           ? this.queryForm.lastLoginDateRange[1]
           : null,
-      },
-    });
+        status: this.queryForm.status
+      }
+    })
 
-    this.userList = data.dataList;
-    this.total = data.total;
-    this.listLoading = false;
+    this.userList = data.dataList
+    this.total = data.total
+    this.listLoading = false
     this.$message({
-      type: "success",
-      message: "查询成功!",
-    });
+      type: 'success',
+      message: '查询成功!'
+    })
   }
 
   // 处理查询按钮点击事件
   private handleQuery() {
-    this.currentPage = 1;
-    this.getUserList();
+    this.currentPage = 1
+    this.getUserList()
   }
 
   // 处理启停事件
   private async handleEnable(row: any) {
-    this.listLoading = true;
-    //弹出提示框询问是否处理
+    this.listLoading = true
+    // 弹出提示框询问是否处理
     await this.$confirm(
-      `确定要${row.status === 0 ? "启用" : "禁用"}该用户吗？`,
-      "提示",
+      `确定要${row.status === 0 ? '启用' : '禁用'}该用户吗？`,
+      '提示',
       {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
       }
-    ).then(async () => {
-      //点击确定后的操作
-      await enableUser({ id: row.id });
+    ).then(async() => {
+      // 点击确定后的操作
+      await enableUser({ id: row.id })
       this.$message({
-        type: "success",
-        message: "操作成功!",
-      });
-      this.getUserList();
-    });
+        type: 'success',
+        message: '操作成功!'
+      })
+      this.getUserList()
+    })
   }
 
   // 处理分页大小变更事件
   private handleSizeChange(size: number) {
-    this.pageSize = size;
-    this.getUserList();
+    this.pageSize = size
+    this.getUserList()
   }
 
   // 处理分页页码变更事件
   private handleCurrentChange(page: number) {
-    this.currentPage = page;
-    this.getUserList();
+    this.currentPage = page
+    this.getUserList()
   }
 
   // 生命周期钩子函数，在组件创建时调用
   private created() {
-    this.getUserList();
+    this.getUserList()
   }
 
   // 处理排序
   async handleSortChange(sort: any) {
-    //处理排序字段
+    // 处理排序字段
 
     // sort: { prop: 'balance', order: 'ascending' or 'descending' }
 
-    this.sortby = sort.prop;
-    this.sortdirection = sort.order;
+    this.sortby = sort.prop
+    this.sortdirection = sort.order
 
-    this.getUserList();
+    this.getUserList()
   }
 
-  //计算未登陆天数
+  // 计算未登陆天数
   formatLastLoginDate(date: Date) {
     if (date) {
-      const now = new Date();
-      const lastLoginDate = new Date(date);
-      const diff = now.getTime() - lastLoginDate.getTime();
-      const days = diff / (1000 * 60 * 60 * 24);
-      return Math.floor(days) + "天";
+      const now = new Date()
+      const lastLoginDate = new Date(date)
+      const diff = now.getTime() - lastLoginDate.getTime()
+      const days = diff / (1000 * 60 * 60 * 24)
+      return Math.floor(days) + '天'
     } else {
-      return "未登陆过";
+      return '未登陆过'
     }
   }
 }
