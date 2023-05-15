@@ -114,11 +114,11 @@ export default class HelpList extends Vue {
   }
 
   goToAdd() {
-    this.$router.push("editor/0");
+    this.$router.push("helpeditor/0");
   }
 
   editHelp(row: any) {
-    this.$router.push("editor/" + row.id);
+    this.$router.push("helpeditor/" + row.id);
   }
 
   async deleteHelp(row: any) {

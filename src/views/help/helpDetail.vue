@@ -14,7 +14,7 @@
           class="upload-list"
           :action="uploadUrl"
           :headers="uploadHeaders"
-          :on-preview="handlePreview"
+          
           :on-remove="handleRemove"
           :file-list="helpInfo.imageList"
           :auto-upload="true"
@@ -132,7 +132,7 @@ export default class HelpAdd extends Vue {
   }
 
   goBack() {
-    this.$router.push({ name: "/help" });
+    this.$router.push("/help/help");
   }
 
   async handlePreview(file: any) {
