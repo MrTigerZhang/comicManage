@@ -227,9 +227,10 @@ export default class AuthorManagement extends Vue {
   }
 
   async searchAuthors() {
-    // Extract the start and end dates from the createDate array
-    const [startDate, endDate] = this.searchForm.createDate;
-
+    
+    if(this.searchForm.createDate==null) {
+      this.searchForm.createDate = [];
+    }
     // 实现查询方法
     // 实现数据请求方法
     this.listLoading = true;
@@ -237,8 +238,8 @@ export default class AuthorManagement extends Vue {
       data: {
         name: this.searchForm.name,
         phone: this.searchForm.phone,
-        startDate: startDate ? startDate : null,
-        endDate: endDate ? endDate : null,
+        startDate:  this.searchForm.createDate[0] ? this.searchForm.createDate[0] : null,
+        endDate: this.searchForm.createDate[1] ? this.searchForm.createDate[1] : null,
       },
       page: this.currentPage,
       size: this.pageSize,
@@ -304,12 +305,24 @@ export default class AuthorManagement extends Vue {
   }
 
   async uploadSuccess(response: any) {
+
+    if (response.code !== 200) {
+      this.$message.error(response.message);
+      this.showImageCropUpload = false;
+      return;
+    }
+    //loading
+    this.$message.success("上传成功");
+    this.listLoading = true;
+
     this.formData.iconUrl = response.data.key;
 
     this.formData.icon = await decryptImage(response.data.url);
     this.showImageCropUpload = false;
     // Manually trigger the 'change' event for the 'icon' field
     (this.$refs.form as any).validateField("icon");
+
+    this.listLoading = false;
   }
 
   resetImageCropUpload() {
