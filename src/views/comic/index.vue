@@ -265,6 +265,7 @@ export default class MangaManagement extends Vue {
         endUpdateDate: this.searchForm.updateDate
           ? this.searchForm.updateDate[1]
           : "",
+        author: this.searchForm.authorName,
         sortBy: this.sort.prop,
         sortDirection: this.sort.order === "ascending" ? "asc" : "desc",
       },

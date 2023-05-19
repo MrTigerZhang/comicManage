@@ -350,7 +350,7 @@ export default class MangaEditor extends Vue {
   }
 
   async uploadSuccess(response: any) {
-     console.log(response);
+    console.log(response);
     if (response.code != 200) {
       this.$message.error("上传失败");
       console.log("上传失败");
@@ -358,6 +358,7 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl = response.data.key;
     this.mangaForm.thumbnail = await decryptImage(response.data.url);
+    this.showImageCropUpload1 = false;
   }
 
   async uploadSuccess2(response: any) {
@@ -368,16 +369,20 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl2 = response.data.key;
     this.mangaForm.thumbnail2 = await decryptImage(response.data.url);
+
+    this.showImageCropUpload2 = false;
   }
 
   async uploadSuccess3(response: any) {
-     console.log(response);
-   if (response.code != 200) {
+    console.log(response);
+    if (response.code != 200) {
       this.$message.error("上传失败");
       return;
     }
     this.mangaForm.thumbnailUrl3 = response.data.key;
     this.mangaForm.thumbnail3 = await decryptImage(response.data.url);
+
+    this.showImageCropUpload3 = false;
   }
 
   resetImageCropUpload() {
@@ -406,7 +411,7 @@ export default class MangaEditor extends Vue {
         if (result) {
           this.$message.success("提交成功");
           //刷新页面
-          this.$router.go(0);
+          this.$router.push({ name: "comic" });
           this.mangaForm.id = result.data.comicId;
           this.comicId = result.data.comicId;
           this.isEditMode = true;
