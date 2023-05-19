@@ -260,9 +260,9 @@ export default class MangaEditor extends Vue {
     name: [
       { required: true, message: "漫画名称是必填项", trigger: "blur" },
       {
-        min: 3,
+        min: 1,
         max: 64,
-        message: "漫画名称长度必须在 3 到 64 之间",
+        message: "漫画名称长度必须在 1 到 64 之间",
         trigger: "blur"
       }
     ],
@@ -275,9 +275,9 @@ export default class MangaEditor extends Vue {
     description: [
       { required: true, message: "漫画简介是必填项", trigger: "change" },
       {
-        min: 30,
+        min: 10,
         max: 256,
-        message: "漫画简介长度必须在 30 到 256 之间",
+        message: "漫画简介长度必须在 10 到 256 之间",
         trigger: "blur"
       }
     ],
@@ -350,6 +350,8 @@ export default class MangaEditor extends Vue {
   }
 
   async uploadSuccess(response: any) {
+    this.listLoading = true;
+     this.showImageCropUpload1 = false;
     console.log(response);
     if (response.code != 200) {
       this.$message.error("上传失败");
@@ -358,10 +360,12 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl = response.data.key;
     this.mangaForm.thumbnail = await decryptImage(response.data.url);
-    this.showImageCropUpload1 = false;
+   this.listLoading = false;
   }
 
   async uploadSuccess2(response: any) {
+    this.listLoading = true;
+    this.showImageCropUpload2 = false;
     console.log(response);
     if (response.code != 200) {
       this.$message.error("上传失败");
@@ -369,12 +373,14 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl2 = response.data.key;
     this.mangaForm.thumbnail2 = await decryptImage(response.data.url);
+    this.listLoading = false;
 
-    this.showImageCropUpload2 = false;
+    
   }
 
   async uploadSuccess3(response: any) {
-    console.log(response);
+    this.listLoading = true;
+     this.showImageCropUpload3 = false;
     if (response.code != 200) {
       this.$message.error("上传失败");
       return;
@@ -382,7 +388,7 @@ export default class MangaEditor extends Vue {
     this.mangaForm.thumbnailUrl3 = response.data.key;
     this.mangaForm.thumbnail3 = await decryptImage(response.data.url);
 
-    this.showImageCropUpload3 = false;
+    this.listLoading = false;
   }
 
   resetImageCropUpload() {
@@ -415,6 +421,8 @@ export default class MangaEditor extends Vue {
           this.mangaForm.id = result.data.comicId;
           this.comicId = result.data.comicId;
           this.isEditMode = true;
+          //跳转到漫画列表页面
+          this.$router.push({ name: "comic" });
         } else {
           this.$message.error("添加失败");
         }
