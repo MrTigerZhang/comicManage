@@ -22,28 +22,28 @@
             min: 3,
             max: 15,
             message: '章节名称应为3-15个字',
-            trigger: 'blur',
-          },
+            trigger: 'blur'
+          }
         ]"
       >
         <el-input
           v-model="chapterForm.name"
           @input="updateNameLength"
+         
         ></el-input>
         <div>{{ nameLength }} / 15</div>
       </el-form-item>
-      <el-form-item label="章节序号" prop="chapterNo">
-        <el-input-number
-          v-model="chapterForm.chapterNo"
-          :min="1"
-        ></el-input-number>
+      <el-form-item label="章节序号" prop="chapterNo"  v-if="isEditMode">
+        <!-- 显示章节序号 不能编辑 -->
+        <el-input v-model="chapterForm.chapterNo" disabled></el-input>
+        
       </el-form-item>
 
       <el-form-item
         label="缩略图"
         :prop="thumbnailUrl"
         :rules="[
-          { required: true, message: '请上传缩略图', trigger: 'change' },
+          { required: true, message: '请上传缩略图', trigger: 'change' }
         ]"
       >
         <div v-if="chapterForm.thumbnailUrl2">
@@ -77,7 +77,7 @@
     <vue-image-crop-upload
       :url="uploadUrl"
       :headers="{
-        'X-Access-Token': getToken(),
+        'X-Access-Token': getToken()
       }"
       :field="'file'"
       v-model="showCropDialog"
@@ -100,8 +100,8 @@ import { UserModule } from "@/store/modules/user";
 @Component({
   components: {
     VueImageCropUpload,
-    "image-list": ImageList,
-  },
+    "image-list": ImageList
+  }
 })
 export default class EditChapter extends Vue {
   uploadUrl = process.env.VUE_APP_BASE_API + "/api/upload";
@@ -115,7 +115,7 @@ export default class EditChapter extends Vue {
     price: 0,
     status: true,
     chapterNo: 1,
-    chapterId: "",
+    chapterId: ""
   };
 
   listLoading = false;
@@ -162,34 +162,36 @@ export default class EditChapter extends Vue {
   }
 
   async saveChapter() {
-    this.$confirm("章节修改后自动更新为下架状态，需要手动重新上架", "提示", {
+    this.$confirm(" 确定要更新章节吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       // 在这里实现保存章节的逻辑
       const isValid = await (this.$refs.chapterForm as any).validate();
       if (isValid) {
+        //判断图片不能为空
+        if (this.chapterForm.thumbnail === "") {
+          this.$message.error("请上传缩略图");
+          return;
+        }
+        //开启loading
+        this.listLoading = true;
+
         const result: any = await addOrUpdateChapter({
           id: this.chapterId === "-1" ? null : this.chapterId,
           comicId: this.comicId,
           name: this.chapterForm.name,
           thumbnail: this.chapterForm.thumbnail,
           price: this.chapterForm.price,
-          chapterNo: this.chapterForm.chapterNo,
+          chapterNo: this.chapterForm.chapterNo
         });
+        this.listLoading = false;
 
         if (result.code === 200) {
-          this.$message.success("更新成功");
-          if (this.isEditMode) {
-            // 更新章节逻辑
-            console.log("更新章节");
-          } else {
-            // 新增章节逻辑
-            console.log("新增章节");
-            // 转换到编辑模式
-            this.isEditMode = true;
-          }
+          this.$message.success("操作成功");
+          //跳转到漫画详情页面
+          this.$router.push({ name: "editor", params: { id:  this.comicId } });
         } else {
           this.$message.error("系统繁忙，请稍后重试");
         }
@@ -210,12 +212,17 @@ export default class EditChapter extends Vue {
 
   //上传成功后，将返回的图片地址赋值给chapterForm.thumbnailUrl
   async cropUploadSuccess(response: any) {
-    if(response.code !== 200) {
+    //关闭上传对话框
+    this.showCropDialog = false;
+    if (response.code !== 200) {
       this.$message.error("上传失败，请稍后重试");
       return;
     }
+    //开启loading
+    this.listLoading = true;
     this.chapterForm.thumbnailUrl2 = await decryptImage(response.data.url);
     this.chapterForm.thumbnail = response.data.key;
+    this.listLoading = false;
   }
 
   cropUploadFail(error: any) {
