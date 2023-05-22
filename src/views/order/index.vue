@@ -45,7 +45,7 @@
             type="daterange"
             start-placeholder="开始日期"
             end-placeholder="结束日期"
-            :picker-options="{ firstDayOfWeek: 1 }"
+          
             value-format="yyyy-MM-dd"
           ></el-date-picker>
         </el-form-item>
