@@ -291,6 +291,15 @@ export default class ComicCategory extends Vue {
 
   // 新方法：处理图片上传成功
   async handleSuccess(response: any) {
+
+    //判断是否上传成功
+    if (response.code !== 200) {
+      this.$message.error("上传失败");
+       //close upload dialog
+      this.showImageCropUpload = false;
+      return;
+    }
+
     // 上传后 解密
     this.formData.iconUrl = response.data.key;
     this.newCategory.iconUrl = response.data.key;

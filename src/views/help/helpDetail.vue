@@ -154,6 +154,15 @@ export default class HelpAdd extends Vue {
   }
 
   async handleUploadSuccess(response: any, file: any, fileList: any[]) {
+
+     if (response.code !== 200) {
+      //alert
+      this.$message.error("上传失败，请稍后重试");
+      //删除图片
+      this.handleRemove(file, fileList);
+      return;
+    }
+
     const { key, url } = response.data;
     file.key = key;
     file.url = await decryptImage(url);

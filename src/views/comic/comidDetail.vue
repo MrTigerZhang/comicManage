@@ -352,7 +352,7 @@ export default class MangaEditor extends Vue {
   async uploadSuccess(response: any) {
     this.listLoading = true;
      this.showImageCropUpload1 = false;
-    console.log(response);
+     this.listLoading = false;
     if (response.code != 200) {
       this.$message.error("上传失败");
       console.log("上传失败");
@@ -360,20 +360,20 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl = response.data.key;
     this.mangaForm.thumbnail = await decryptImage(response.data.url);
-   this.listLoading = false;
+  
   }
 
   async uploadSuccess2(response: any) {
     this.listLoading = true;
     this.showImageCropUpload2 = false;
-    console.log(response);
+    this.listLoading = false;
     if (response.code != 200) {
       this.$message.error("上传失败");
       return;
     }
     this.mangaForm.thumbnailUrl2 = response.data.key;
     this.mangaForm.thumbnail2 = await decryptImage(response.data.url);
-    this.listLoading = false;
+   
 
     
   }
@@ -381,14 +381,14 @@ export default class MangaEditor extends Vue {
   async uploadSuccess3(response: any) {
     this.listLoading = true;
      this.showImageCropUpload3 = false;
+      this.listLoading = false;
     if (response.code != 200) {
       this.$message.error("上传失败");
       return;
     }
     this.mangaForm.thumbnailUrl3 = response.data.key;
     this.mangaForm.thumbnail3 = await decryptImage(response.data.url);
-
-    this.listLoading = false;
+ 
   }
 
   resetImageCropUpload() {

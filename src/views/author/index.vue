@@ -306,8 +306,9 @@ export default class AuthorManagement extends Vue {
 
   async uploadSuccess(response: any) {
 
+    console.log(response);
     if (response.code !== 200) {
-      this.$message.error(response.message);
+      this.$message.error("上传失败");
       this.showImageCropUpload = false;
       return;
     }

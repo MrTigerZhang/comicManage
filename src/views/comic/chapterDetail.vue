@@ -19,9 +19,9 @@
         :rules="[
           { required: true, message: '请输入章节名称', trigger: 'blur' },
           {
-            min: 3,
+            min: 1,
             max: 15,
-            message: '章节名称应为3-15个字',
+            message: '章节名称应为1-15个字',
             trigger: 'blur'
           }
         ]"
