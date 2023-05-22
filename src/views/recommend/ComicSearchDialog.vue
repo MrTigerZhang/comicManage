@@ -4,6 +4,7 @@
     title="搜索漫画"
     width="50%"
     @close="resetForm"
+    :modal="false"
   >
     <el-input
       v-model="searchParams.name"
@@ -73,11 +74,21 @@ export default {
     openDialog(row) {
       this.selectedRow = row;
       this.dialogVisible = true;
+      this.searchParam= {
+        name: ""
+      }
+      this.pagination = {
+        currentPage: 1,
+        pageSize: 10,
+        total: 0
+      };
+      this.search();
     },
     resetForm() {
       this.searchParams.name = "";
     },
     async search() {
+
       this.loading = true;
       const { data } = await getComicList({
         data: this.searchParams,
@@ -91,6 +102,12 @@ export default {
     selectComic(comic) {
       this.$emit("selectedComic", this.selectedRow, comic);
       this.dialogVisible = false;
+      //alert
+      this.$message({
+        message: "选择成功: "+comic.name+". 提交后更新图片",
+        type: "success"
+      });
+
     },
     handlePageChange(newPage) {
       this.pagination.currentPage = newPage;

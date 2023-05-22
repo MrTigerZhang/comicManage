@@ -99,7 +99,9 @@ export default {
       this.recommendationItems = [];
     },
     openComicSearchDialog(row) {
-      this.$refs.comicSearchDialog.openDialog(row);
+       this.loading = false;
+       //打开选择漫画的对话框，不带遮罩
+        this.$refs.comicSearchDialog.openDialog(row);
     },
     updateSelectedComic(row, comic) {
       row.comicId = comic.id;
