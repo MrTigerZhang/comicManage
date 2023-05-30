@@ -15,7 +15,10 @@
 
     <div>
       <el-button type="success" @click="goToAdd">新增</el-button>
+      <el-button type="primary"
+       @click="refresh">刷新缓存</el-button>
     </div>
+       
 
     <el-table :data="helpList" border style="width: 100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="180"></el-table-column>
@@ -73,7 +76,8 @@ import {
   addHelp,
   deleteHelp,
   updateHelp,
-  getHelpList
+  getHelpList,
+  refresh
 } from "@/api/help";
 
 @Component
@@ -150,6 +154,21 @@ export default class HelpList extends Vue {
   handleCurrentChange(val: number) {
     this.currentPage = val;
     this.getList();
+  }
+  refresh(){
+    this.$confirm("确认刷新缓存吗？", "提示", {
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning"
+    })
+      .then(async () => {
+        await  refresh({});
+        this.$message({
+          type: "success",
+          message: "刷新成功!"
+        });
+      }) 
+   
   }
 }
 </script>

@@ -64,7 +64,7 @@
         <el-button type="info" @click="openMangaEditor(-1)">新增</el-button>
       </el-form-item>
       <el-form-item>
-        <el-button type="warning" @click="startScraping">采集</el-button>
+        <el-button type="warning" @click="startScraping">清空缓存</el-button>
       </el-form-item>
     </el-form>
 
@@ -297,14 +297,14 @@ export default class MangaManagement extends Vue {
 
   // 开始抓取漫画
   async startScraping() {
-    this.$confirm("请不要频繁抓取", "提示", {
+    this.$confirm("确定要开始清空缓存吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
       type: "warning",
     }).then(async () => {
       const response: any = await startScraping({});
       if (response.code === 200) {
-        this.$message.success("已开始采集任务");
+        this.$message.success("操作成功");
       } else {
         this.$message.error(response.msg);
       }

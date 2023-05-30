@@ -8,6 +8,14 @@ export const getHelpList = (params: any) =>
         data: params
     })
 
+//refresh
+export const refresh = (params: any) =>
+    request({
+        url: '/sys/help/refresh',
+        method: 'post',
+        data: params
+    })
+
 export const addHelp = (params: any) =>
     request({
         url: '/sys/help/add',
