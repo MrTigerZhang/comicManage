@@ -29,14 +29,12 @@
         <el-input
           v-model="chapterForm.name"
           @input="updateNameLength"
-         
         ></el-input>
         <div>{{ nameLength }} / 15</div>
       </el-form-item>
-      <el-form-item label="章节序号" prop="chapterNo"  v-if="isEditMode">
+      <el-form-item label="章节序号" prop="chapterNo" v-if="isEditMode">
         <!-- 显示章节序号 不能编辑 -->
         <el-input v-model="chapterForm.chapterNo" disabled></el-input>
-        
       </el-form-item>
 
       <el-form-item
@@ -93,10 +91,11 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import VueImageCropUpload from "vue-image-crop-upload";
-import { getChapterById, addOrUpdateChapter } from "@/api/comic";
+import { getChapterById, addOrUpdateChapter, getComicPrice } from "@/api/comic";
 import ImageList from "./cmps/ImageList.vue";
 import { decryptImage } from "@/utils/AES";
 import { UserModule } from "@/store/modules/user";
+import { get } from "http";
 @Component({
   components: {
     VueImageCropUpload,
@@ -153,6 +152,12 @@ export default class EditChapter extends Vue {
       this.listLoading = false;
       this.updateNameLength();
     } else {
+      this.chapterForm.price = (
+        await await getComicPrice({ id: this.comicId })
+      ).data;
+      if(!this.chapterForm.price){
+        this.chapterForm.price = 0;
+      }
       this.listLoading = false;
     }
   }
@@ -191,7 +196,7 @@ export default class EditChapter extends Vue {
         if (result.code === 200) {
           this.$message.success("操作成功");
           //跳转到漫画详情页面
-          this.$router.push({ name: "editor", params: { id:  this.comicId } });
+          this.$router.push({ name: "editor", params: { id: this.comicId } });
         } else {
           this.$message.error("系统繁忙，请稍后重试");
         }

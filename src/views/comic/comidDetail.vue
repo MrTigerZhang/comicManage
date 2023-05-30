@@ -179,6 +179,21 @@
           <el-option label="已完结" :value="2"></el-option>
         </el-select>
       </el-form-item>
+      <aside v-if="isEditMode">
+        批量设置章节收费 从第几章开始收费，每章节的费用
+      </aside>
+      <!-- 开始收费章节 输入从第几章开始收费 -->
+      <el-form-item label="开始收费" prop="fromFee" v-if="isEditMode">
+        <el-input v-model="mangaForm.fromFee"></el-input>
+      </el-form-item>
+      <!-- 收费章节的费用，开始收费章节不等于0时，该值必填，并且显示，否则隐藏 -->
+      <el-form-item
+        label="收费章节费用"
+        prop="fee"
+        v-if="isEditMode && mangaForm.fromFee && mangaForm.fromFee != 0"
+      >
+        <el-input v-model="mangaForm.fee"></el-input>
+      </el-form-item>
 
       <el-form-item>
         <el-button type="primary" @click="submitForm">提交</el-button>
@@ -243,7 +258,9 @@ export default class MangaEditor extends Vue {
     thumbnailUrl2: "",
     thumbnail3: "",
     thumbnailUrl3: "",
-    label: ""
+    label: "",
+    fee: 0,
+    fromFee: 0
   };
 
   imagePreviewDialogVisible = false;
@@ -308,6 +325,7 @@ export default class MangaEditor extends Vue {
     const data = (await getComicDetail({ id: id })).data;
 
     this.mangaForm = data;
+    this.mangaForm.fromFee = data.freeUntil + 1;
     // 由于后端返回的是加密的图片，所以需要解密
     var tmp: string = this.mangaForm.thumbnail;
     if (
@@ -351,8 +369,8 @@ export default class MangaEditor extends Vue {
 
   async uploadSuccess(response: any) {
     this.listLoading = true;
-     this.showImageCropUpload1 = false;
-     this.listLoading = false;
+    this.showImageCropUpload1 = false;
+    this.listLoading = false;
     if (response.code != 200) {
       this.$message.error("上传失败");
       console.log("上传失败");
@@ -360,7 +378,6 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl = response.data.key;
     this.mangaForm.thumbnail = await decryptImage(response.data.url);
-  
   }
 
   async uploadSuccess2(response: any) {
@@ -373,22 +390,18 @@ export default class MangaEditor extends Vue {
     }
     this.mangaForm.thumbnailUrl2 = response.data.key;
     this.mangaForm.thumbnail2 = await decryptImage(response.data.url);
-   
-
-    
   }
 
   async uploadSuccess3(response: any) {
     this.listLoading = true;
-     this.showImageCropUpload3 = false;
-      this.listLoading = false;
+    this.showImageCropUpload3 = false;
+    this.listLoading = false;
     if (response.code != 200) {
       this.$message.error("上传失败");
       return;
     }
     this.mangaForm.thumbnailUrl3 = response.data.key;
     this.mangaForm.thumbnail3 = await decryptImage(response.data.url);
- 
   }
 
   resetImageCropUpload() {
@@ -412,6 +425,8 @@ export default class MangaEditor extends Vue {
           status: this.mangaForm.status,
           banned: this.mangaForm.banned,
           label: this.mangaForm.label,
+          fee: this.mangaForm.fee,
+          fromFee: this.mangaForm.fromFee,
           enable: 0
         });
         if (result) {

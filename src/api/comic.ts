@@ -81,7 +81,12 @@ export const getChapterById = (params: any) =>
     method: 'post',
     data: params
   })
-
+export const  getComicPrice = (params: any) =>
+  request({
+    url: '/sys/chapter/price',
+    method: 'post',
+    data: params
+  })
 export const addOrUpdateChapter = (params: any) =>
   request({
     url: '/sys/chapter/addOrUpdate',
