@@ -4,11 +4,11 @@
     <aside>
       本系统分类均为一级分类，分类下有若干漫画，漫画下有若干章节，漫画和章节的关系是一对多的关系，分类和漫画的关系是一对多的关。
 
-      </br>
+      <br>
       尺寸为340*200
-      </br>
+      <br>
       更新后数据设置为为未启用状态，需要手动启用。
-      </br>
+      <br>
       清空缓存后，才可以立即看到效果
     </aside>
 
@@ -142,7 +142,7 @@ import { decryptImage } from "@/utils/AES";
   }
 })
 export default class ComicCategory extends Vue {
-  comicCategories: ComicCategoryData[] = [];
+  comicCategories:any=[];
   addCategoryDialogVisible = false;
   newCategory: ComicCategoryData = {};
   showImageCropUpload = false;
@@ -176,7 +176,7 @@ export default class ComicCategory extends Vue {
     ]
   };
 
-  async mounted() {
+  async created() {
     await this.searchCategories();
     this.$nextTick(() => {
       this.setSort();
@@ -235,21 +235,19 @@ export default class ComicCategory extends Vue {
   // 查询方法
   async searchCategories() {
     this.listLoading = true;
-    this.comicCategories = (await getCategories({})).data.dataList;
+   const dataLists:any =(await getCategories({})).data.dataList;
     // 在客户端解密图片
     // 解密图片
-    const decryptedIcons = await Promise.all(
-      this.comicCategories.map(async (cc: any) => {
-        return await decryptImage(cc.iconUrl);
+    this.comicCategories =  await Promise.all(
+     dataLists.map(async (cc: any) => {
+       var tmp = cc.icon;
+        cc.icon = await decryptImage(cc.iconUrl);
+        cc.iconUrl = tmp;
+        return cc;
       })
     );
 
-    this.comicCategories = this.comicCategories.map((cc, index) => {
-      // 用解密后的图片替换原来的图片
-      cc.iconUrl = cc.icon;
-      cc.icon = decryptedIcons[index];
-      return cc;
-    });
+    
     this.listLoading = false;
   }
 

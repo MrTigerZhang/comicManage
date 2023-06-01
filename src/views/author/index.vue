@@ -245,18 +245,16 @@ export default class AuthorManagement extends Vue {
       size: this.pageSize,
     });
     this.authors = [];
-    this.authors = data.data.dataList;
-    const decryptedIcons = await Promise.all(
-      this.authors.map(async (author) => {
-        return await decryptImage(author.iconUrl);
+     const authorsTmp = await Promise.all(
+      data.data.dataList.map(async (author:any) => {
+          var tmp = author.icon;
+          author.icon =  await decryptImage(author.iconUrl);
+          author.iconUrl = tmp;
+          return author;
       })
     );
-
-    this.authors = this.authors.map((author, index) => {
-      author.iconUrl = author.icon;
-      author.icon = decryptedIcons[index];
-      return author;
-    });
+    this.authors = authorsTmp;
+   
 
     this.total = data.data.total;
     this.listLoading = false;

@@ -256,7 +256,7 @@ export default class MangaEditor extends Vue {
     thumbnailUrl: "" as string | null,
     thumbnail2: "" as string | null,
     thumbnailUrl2: "" as string | null,
-    thumbnail3: ""  as string | null,
+    thumbnail3: "" as string | null,
     thumbnailUrl3: "" as string | null,
     label: "",
     fee: 0,
@@ -327,7 +327,12 @@ export default class MangaEditor extends Vue {
     this.mangaForm = data;
     this.mangaForm.fromFee = data.freeUntil + 1;
     // 由于后端返回的是加密的图片，所以需要解密
-    var tmp: string|null = this.mangaForm.thumbnail;
+    var tmp: string | null = this.mangaForm.thumbnail;
+    var tmp2: string | null = this.mangaForm.thumbnail2;
+    var tmp3: string | null = this.mangaForm.thumbnail3;
+    this.mangaForm.thumbnail = "";
+    this.mangaForm.thumbnail2 = "";
+    this.mangaForm.thumbnail3 = "";
     if (
       this.mangaForm.thumbnailUrl &&
       this.mangaForm.thumbnailUrl.indexOf("null") == -1
@@ -339,7 +344,6 @@ export default class MangaEditor extends Vue {
     }
 
     // 由于后端返回的是加密的图片，所以需要解密
-    var tmp2: string|null = this.mangaForm.thumbnail2;
     if (
       this.mangaForm.thumbnailUrl2 &&
       this.mangaForm.thumbnailUrl2.indexOf("null") == -1
@@ -351,7 +355,7 @@ export default class MangaEditor extends Vue {
     }
 
     // 由于后端返回的是加密的图片，所以需要解密
-    var tmp3: string|null = this.mangaForm.thumbnail3;
+
     if (
       this.mangaForm.thumbnailUrl3 &&
       this.mangaForm.thumbnailUrl3.indexOf("null") == -1

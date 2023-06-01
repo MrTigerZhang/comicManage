@@ -244,17 +244,12 @@ export default class ChapterManager extends Vue {
           size: this.pageSize
         })
       ).data;
-      this.chapters = dataList;
-      const decryptedIcons = await Promise.all(
-        this.chapters.map(async chapter => {
-          return await decryptImage(chapter.thumbnailUrl);
+    this.chapters =  await Promise.all(
+           dataList.map(async (chapter:any) => {
+            chapter.thumbnailUrl2 = await decryptImage(chapter.thumbnailUrl);
+            return chapter;
         })
       );
-
-      this.chapters = this.chapters.map((chapter, index) => {
-        chapter.thumbnailUrl2 = decryptedIcons[index];
-        return chapter;
-      });
 
       this.totalItems = total;
       this.listLoading = false;

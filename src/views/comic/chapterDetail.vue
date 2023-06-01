@@ -39,7 +39,7 @@
 
       <el-form-item
         label="缩略图"
-        :prop="thumbnailUrl"
+        :prop="chapterForm.thumbnailUrl2"
         :rules="[
           { required: true, message: '请上传缩略图', trigger: 'change' }
         ]"

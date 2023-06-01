@@ -42,16 +42,22 @@ export async function decryptImage(imageUrl: string) {
     if (!imageUrl) {
         return null
     }
-    // 如果系统配置了加密，则对图像进行解密
-    if (UserModule.systemConfig.imageEncryptionEnabled == 1) {
 
+    try {
+        // 如果系统配置了加密，则对图像进行解密
+        if (UserModule.systemConfig.imageEncryptionEnabled == 1) {
 
+            const imageData = await getImageDataAsBase64(imageUrl)
+            const decryptedImageData = decryptImageData(imageData)
 
-        const imageData = await getImageDataAsBase64(imageUrl)
-        const decryptedImageData = decryptImageData(imageData)
-
-        return decryptedImageData
-    } else {
-        return imageUrl;
+            return decryptedImageData
+        } else {
+            return imageUrl;
+        }
     }
+    catch (error) {
+        console.error(error)
+        return null
+    }
+
 }

@@ -101,7 +101,7 @@
           <div @click="showDescriptionDialog(scope.row)">
             {{
               scope.row.description.slice(0, 10) +
-              (scope.row.description.length > 10 ? "..." : "")
+                (scope.row.description.length > 10 ? "..." : "")
             }}
           </div>
         </template>
@@ -221,7 +221,7 @@ import {
   getCategorys,
   toggleBan,
   deleteManga,
-  startScraping,
+  startScraping
 } from "@/api/comic";
 @Component
 export default class MangaManagement extends Vue {
@@ -267,30 +267,28 @@ export default class MangaManagement extends Vue {
           : "",
         author: this.searchForm.authorName,
         sortBy: this.sort.prop,
-        sortDirection: this.sort.order === "ascending" ? "asc" : "desc",
+        sortDirection: this.sort.order === "ascending" ? "asc" : "desc"
       },
       page: this.currentPage,
-      size: this.pageSize,
+      size: this.pageSize
     });
     this.mangas = [];
     this.mangas = data.data.dataList;
-    const decryptedIcons = await Promise.all(
-      this.mangas.map(async (comic) => {
-        return await decryptImage(comic.thumbnailUrl);
-      })
+   this.mangas =  await Promise.all(
+      // 解密缩略图 URL 并赋值给 thumbnail2 字段 (用于显示)
+      //map() 方法返回一个新数组，数组中的元素为原始数组元素调用函数处理后的值。
+      ( this.mangas.map(async (manga:any) => {
+        manga.thumbnail2 = await decryptImage(manga.thumbnailUrl);
+        return manga;
+      }))
     );
-
-    this.mangas = this.mangas.map((comic, index) => {
-      comic.thumbnail2 = decryptedIcons[index];
-      return comic;
-    });
 
     this.total = data.data.total;
     this.listLoading = false;
   }
 
   // 打开漫画编辑页面
-  openMangaEditor(mangaId: string  ) {
+  openMangaEditor(mangaId: any) {
     // 编辑模式
     this.$router.push({ name: "editor", params: { id: mangaId } });
   }
@@ -300,7 +298,7 @@ export default class MangaManagement extends Vue {
     this.$confirm("确定要开始清空缓存吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       const response: any = await startScraping({});
       if (response.code === 200) {
@@ -316,7 +314,7 @@ export default class MangaManagement extends Vue {
     this.$confirm("确定删除该漫画吗？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       const response: any = await deleteManga({ id: manga.id });
       if (response.code === 200) {
@@ -337,7 +335,7 @@ export default class MangaManagement extends Vue {
       {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
-        type: "warning",
+        type: "warning"
       }
     ).then(async () => {
       const response: any = await toggleBan({ id: manga.id });
@@ -378,7 +376,7 @@ export default class MangaManagement extends Vue {
       this.sort.prop = "update_date";
     }
     if (this.sort.prop === "freeUntil") {
-      this.sort.prop = "free_until"; 
+      this.sort.prop = "free_until";
     }
     this.searchMangas();
   }
@@ -396,7 +394,7 @@ export default class MangaManagement extends Vue {
       createDateStart: "",
       createDateEnd: "",
       updateDateStart: "",
-      updateDateEnd: "",
+      updateDateEnd: ""
     };
   }
 

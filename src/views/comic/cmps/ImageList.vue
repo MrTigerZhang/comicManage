@@ -66,14 +66,14 @@ import {
   addContent,
   queryContentList,
   deleteContent,
-  updateContentSort,
+  updateContentSort
 } from "@/api/comic";
 import Sortable from "sortablejs";
 import { decryptImage } from "@/utils/AES";
 @Component({
   components: {
-    dropzone: Dropzone,
-  },
+    dropzone: Dropzone
+  }
 })
 export default class ComicContentManager extends Vue {
   uploadUrl = process.env.VUE_APP_BASE_API + "/api/upload";
@@ -81,9 +81,9 @@ export default class ComicContentManager extends Vue {
   @Prop({ required: true }) comicId!: string;
   private sortable: Sortable | null = null;
   listLoading = false;
-  comicList: any = [
-    // 示例数据
-  ];
+  comicList: any =[{
+    imgSrc2:""
+  }]
 
   selectedRows: any[] = [];
 
@@ -98,23 +98,19 @@ export default class ComicContentManager extends Vue {
     this.listLoading = true;
     const data: any = await queryContentList({
       data: {
-        chapterId: this.chapterId,
+        chapterId: this.chapterId
       },
       page: 1,
-      size: 1000,
+      size: 1000
     });
-    this.comicList = data.data.dataList;
 
-    const decryptedIcons = await Promise.all(
-      this.comicList.map(async (cc: any) => {
-        return await decryptImage(cc.imgSrcUrl);
+    this.comicList = await Promise.all(
+      data.data.dataList.map(async (cc: any) => {
+        cc.imgSrc2 = await decryptImage(cc.imgSrcUrl);
+        return cc;
       })
     );
 
-    this.comicList = this.comicList.map((cc: any, index: any) => {
-      cc.imgSrc2 = decryptedIcons[index];
-      return cc;
-    });
     this.listLoading = false;
   }
 
@@ -126,9 +122,9 @@ export default class ComicContentManager extends Vue {
     this.$confirm("是否要批量删除这些图片？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
-      this.selectedRows.forEach(async (row) => {
+      this.selectedRows.forEach(async row => {
         await this.del(row);
       });
     });
@@ -138,7 +134,7 @@ export default class ComicContentManager extends Vue {
     this.$confirm("是否要删除图片？", "提示", {
       confirmButtonText: "确定",
       cancelButtonText: "取消",
-      type: "warning",
+      type: "warning"
     }).then(async () => {
       await this.del(row);
     });
@@ -166,11 +162,11 @@ export default class ComicContentManager extends Vue {
     const el = (this.$refs.form as Vue).$el.querySelectorAll(
       ".el-table__body-wrapper > table > tbody"
     )[0] as HTMLElement;
-    console.log(el);
+    
     this.sortable = Sortable.create(el, {
       ghostClass: "sortable-ghost2", // Class name for the drop placeholder
       handle: ".handle", // 拖拽手柄的选择器
-      onEnd: async (evt) => {
+      onEnd: async evt => {
         if (
           typeof evt.oldIndex !== "undefined" &&
           typeof evt.newIndex !== "undefined"
@@ -183,18 +179,18 @@ export default class ComicContentManager extends Vue {
           // 调用您的 API 更新排序，例如：
           await updateContentSort({
             id: oldId.id,
-            anotherId: anotherId.id,
+            anotherId: anotherId.id
           });
           this.$message.success("操作成功");
           await this.queryContent();
         }
-      },
+      }
     });
   }
 }
 </script>
 
-<style lang="scss" scoped >
+<style lang="scss" scoped>
 /* 在这里编写你的样式 */
 .handle {
   cursor: move;
