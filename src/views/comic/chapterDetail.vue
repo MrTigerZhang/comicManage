@@ -109,7 +109,7 @@ export default class EditChapter extends Vue {
     name: "",
     thumbnail: "",
     thumbnailUrl: "",
-    thumbnailUrl2: "",
+    thumbnailUrl2: "" as any,
     pageCount: 1,
     price: 0,
     status: true,

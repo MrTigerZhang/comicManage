@@ -14,7 +14,6 @@
           class="upload-list"
           :action="uploadUrl"
           :headers="uploadHeaders"
-          
           :on-remove="handleRemove"
           :file-list="helpInfo.imageList"
           :auto-upload="true"
@@ -137,7 +136,7 @@ export default class HelpAdd extends Vue {
 
   async handlePreview(file: any) {
     const image = await decryptImage(file.url as string);
-    window.open(image);
+    if (image) window.open(image);
   }
 
   handleRemove(file: any, fileList: any[]) {
@@ -154,8 +153,7 @@ export default class HelpAdd extends Vue {
   }
 
   async handleUploadSuccess(response: any, file: any, fileList: any[]) {
-
-     if (response.code !== 200) {
+    if (response.code !== 200) {
       //alert
       this.$message.error("上传失败，请稍后重试");
       //删除图片

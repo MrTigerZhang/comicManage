@@ -290,7 +290,7 @@ export default class MangaManagement extends Vue {
   }
 
   // 打开漫画编辑页面
-  openMangaEditor(mangaId: string | null = null) {
+  openMangaEditor(mangaId: string  ) {
     // 编辑模式
     this.$router.push({ name: "editor", params: { id: mangaId } });
   }

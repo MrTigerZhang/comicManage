@@ -178,7 +178,7 @@ interface Chapter {
   updatedAt: string;
   status: number;
   thumbnailUrl: string;
-  thumbnailUrl2: string;
+  thumbnailUrl2: any;
 }
 
 interface SearchForm {
